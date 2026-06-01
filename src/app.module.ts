@@ -36,7 +36,12 @@ import { AdminsModule } from './admins/admins.module';
                 entities: [User, Product, Gift, Purchase, GiftPurchase, AppSetting, Admin],
                 synchronize: config.get<string>('NODE_ENV') !== 'production',
                 logging: config.get<string>('NODE_ENV') === 'development',
-                ssl: config.get<string>('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
+                // Production (Vercel/Neon) da SSL doim yoqiladi; lokalda DB_SSL=true bo'lsa
+                ssl:
+                    config.get<string>('NODE_ENV') === 'production' ||
+                    config.get<string>('DB_SSL') === 'true'
+                        ? { rejectUnauthorized: false }
+                        : false,
             }),
         }),
         TelegrafModule.forRootAsync({

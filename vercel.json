@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "dist/lambda.js",
+      "src": "dist/main.js",
       "use": "@vercel/node",
       "config": {
         "includeFiles": [
@@ -16,7 +16,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/lambda.js"
+      "dest": "dist/main.js"
     }
   ]
 }

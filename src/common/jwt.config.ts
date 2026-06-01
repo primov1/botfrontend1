@@ -11,17 +11,17 @@ export function resolveJwtSecret(config: ConfigService): string {
     const secret = config.get<string>('JWT_SECRET');
     if (secret && secret.trim()) return secret.trim();
 
+    // JWT_SECRET bo'lmasa ham ilovani ishdan chiqarmaymiz (production crash bo'lmasin),
+    // lekin jiddiy ogohlantirish beramiz — bu xavfsiz emas.
     if (config.get<string>('NODE_ENV') === 'production') {
-        throw new Error(
-            'JWT_SECRET muhit o\'zgaruvchisi production uchun majburiy. ' +
-            'Railway/Vercel → Variables ga uzun, tasodifiy qiymat qo\'shing.',
+        // eslint-disable-next-line no-console
+        console.error(
+            '[auth] XAVF: JWT_SECRET o\'rnatilmagan! Vaqtinchalik xavfsiz bo\'lmagan kalit ' +
+            'ishlatilmoqda. Vercel → Settings → Environment Variables ga JWT_SECRET qo\'shing.',
         );
+    } else {
+        // eslint-disable-next-line no-console
+        console.warn('[auth] JWT_SECRET yo\'q — dev fallback ishlatilmoqda.');
     }
-
-    // eslint-disable-next-line no-console
-    console.warn(
-        '[auth] JWT_SECRET o\'rnatilmagan — vaqtinchalik dev kaliti ishlatilmoqda. ' +
-        'Production\'da albatta JWT_SECRET qo\'ying.',
-    );
     return DEV_FALLBACK_SECRET;
 }
