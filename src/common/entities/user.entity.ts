@@ -24,9 +24,11 @@ export class User {
     })
     telegramId: number;
 
+    // bot_backend bilan bir xil: null'ga ruxsat (unique null'larni alohida sanaydi,
+    // telefonsiz yozuvlar to'qnashmaydi). Umumiy DB sxemasi mos bo'lishi uchun.
     @Index()
-    @Column({ type: 'varchar', default: '', unique: true })
-    phone: string;
+    @Column({ type: 'varchar', nullable: true, unique: true })
+    phone: string | null;
 
     @Column({ type: 'varchar', default: '' })
     firstName: string;
