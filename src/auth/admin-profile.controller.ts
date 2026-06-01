@@ -41,6 +41,7 @@ export class AdminProfileController {
         @Body('newLogin') newLogin: string,
         @Body('newPassword') newPassword: string,
         @Body('confirmPassword') confirmPassword: string,
+        @Body('phone') phone: string,
         @Res() res: Response,
     ) {
         if (!this.profileService.validatePassword(currentPassword ?? ''))
@@ -48,9 +49,13 @@ export class AdminProfileController {
 
         const loginVal = (newLogin ?? '').trim();
         const passVal  = (newPassword ?? '').trim();
+        const phoneVal = (phone ?? '').trim();
 
         if (!loginVal || loginVal.length < 3)
             return res.redirect('/admin/profile?cred_error=login_short');
+
+        if (!phoneVal)
+            return res.redirect('/admin/profile?cred_error=phone_required');
 
         if (passVal) {
             if (passVal.length < 6)
@@ -60,6 +65,7 @@ export class AdminProfileController {
         }
 
         this.profileService.updateLogin(loginVal);
+        this.profileService.updatePhone(phoneVal);
         if (passVal) this.profileService.updatePassword(passVal);
 
         const { token, ttl } = this.authService.sign({

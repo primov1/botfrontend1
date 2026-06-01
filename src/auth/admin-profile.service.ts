@@ -9,6 +9,7 @@ export interface AdminProfile {
     login: string;
     avatar: string | null;
     name: string;
+    phone: string;
 }
 
 const BCRYPT_ROUNDS = 10;
@@ -19,6 +20,7 @@ const KEY_LOGIN = 'admin_login';
 const KEY_PASSWORD = 'admin_password_hash';
 const KEY_NAME = 'admin_name';
 const KEY_AVATAR = 'admin_avatar';
+const KEY_PHONE = 'admin_phone';
 
 /**
  * Admin profili. Standart qiymatlar muhit o'zgaruvchilaridan olinadi,
@@ -33,6 +35,7 @@ export class AdminProfileService implements OnModuleInit {
     private currentPasswordHash: string;
     private currentName: string;
     private currentAvatar: string | null = null;
+    private currentPhone: string;
 
     constructor(
         private readonly config: ConfigService,
@@ -51,6 +54,8 @@ export class AdminProfileService implements OnModuleInit {
 
         const avatarUrl = this.config.get<string>('ADMIN_AVATAR', '');
         this.currentAvatar = avatarUrl || null;
+
+        this.currentPhone = this.config.get<string>('ADMIN_PHONE', '');
     }
 
     async onModuleInit(): Promise<void> {
@@ -71,8 +76,15 @@ export class AdminProfileService implements OnModuleInit {
 
     getLogin(): string { return this.currentLogin; }
 
+    getPhone(): string { return this.currentPhone; }
+
     getProfile(): AdminProfile {
-        return { login: this.currentLogin, avatar: this.currentAvatar, name: this.currentName };
+        return {
+            login: this.currentLogin,
+            avatar: this.currentAvatar,
+            name: this.currentName,
+            phone: this.currentPhone,
+        };
     }
 
     validatePassword(password: string): boolean {
@@ -92,6 +104,11 @@ export class AdminProfileService implements OnModuleInit {
     updateName(newName: string): void {
         this.currentName = newName.trim();
         this.save(KEY_NAME, this.currentName);
+    }
+
+    updatePhone(newPhone: string): void {
+        this.currentPhone = newPhone.trim();
+        this.save(KEY_PHONE, this.currentPhone);
     }
 
     saveAvatar(url: string): void {
@@ -133,6 +150,7 @@ export class AdminProfileService implements OnModuleInit {
             if (passwordHash) this.currentPasswordHash = passwordHash;
             if (name) this.currentName = name;
             if (map.has(KEY_AVATAR)) this.currentAvatar = map.get(KEY_AVATAR) || null;
+            if (map.has(KEY_PHONE)) this.currentPhone = map.get(KEY_PHONE) || '';
         } catch (err) {
             this.logger.warn(`Profil sozlamalarini o'qib bo'lmadi: ${(err as Error).message}`);
         }

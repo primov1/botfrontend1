@@ -11,6 +11,7 @@
   {{#if (eq query.cred_ok "1")}}<div class="alert alert-success">✅ Login va parol muvaffaqiyatli yangilandi.</div>{{/if}}
   {{#if (eq query.cred_error "wrong_current")}}<div class="alert alert-error">❌ Joriy parol noto'g'ri.</div>{{/if}}
   {{#if (eq query.cred_error "login_short")}}<div class="alert alert-error">❌ Login kamida 3 ta belgi bo'lishi kerak.</div>{{/if}}
+  {{#if (eq query.cred_error "phone_required")}}<div class="alert alert-error">❌ Telefon raqamni kiriting.</div>{{/if}}
   {{#if (eq query.cred_error "pass_short")}}<div class="alert alert-error">❌ Yangi parol kamida 6 ta belgi bo'lishi kerak.</div>{{/if}}
   {{#if (eq query.cred_error "pass_mismatch")}}<div class="alert alert-error">❌ Yangi parollar mos kelmadi.</div>{{/if}}
   {{#if (eq query.avatar_ok "1")}}<div class="alert alert-success">✅ Profil rasmi yangilandi.</div>{{/if}}
@@ -96,6 +97,17 @@
                autocomplete="username"
                style="max-width:320px"
                placeholder="Kamida 3 ta belgi">
+      </label>
+
+      {{! Telefon raqam }}
+      <label class="field">
+        <span class="field-label">Telefon raqam <span class="req">*</span></span>
+        <input class="input" type="tel" name="phone"
+               value="{{profile.phone}}"
+               required
+               autocomplete="tel"
+               style="max-width:320px"
+               placeholder="+998 90 123 45 67">
       </label>
 
       {{! Yangi parol (ixtiyoriy — bo'sh qolsa o'zgarmaydi) }}

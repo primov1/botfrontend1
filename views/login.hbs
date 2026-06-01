@@ -26,6 +26,14 @@
             <span class="field-label">Parol</span>
             <input class="input" type="password" name="password" placeholder="••••••••" required />
           </label>
+          {{#if needPhone}}
+          <label class="field">
+            <span class="field-label">Telefon raqam</span>
+            <input class="input" type="tel" name="phone" value="{{phone}}"
+                   placeholder="+998 90 123 45 67" required />
+            <span class="field-hint">Bir marta kiritiladi va eslab qolinadi</span>
+          </label>
+          {{/if}}
           <button class="btn btn-primary btn-block" type="submit">Kirish</button>
         </form>
       </div>
