@@ -24,23 +24,36 @@ import { AdminsModule } from './admins/admins.module';
         ConfigModule.forRoot({ isGlobal: true }),
         TypeOrmModule.forRootAsync({
             inject: [ConfigService],
-            useFactory: (config: ConfigService) => ({
-                type: 'postgres',
-                host: config.get<string>('DB_HOST', 'localhost'),
-                port: config.get<number>('DB_PORT', 5432),
-                username: config.get<string>('DB_USERNAME', 'postgres'),
-                password: config.get<string>('DB_PASSWORD', ''),
-                database: config.get<string>('DB_NAME', 'bot_loyiha'),
-                entities: [User, Product, Gift, Purchase, GiftPurchase, AppSetting, Admin],
-                synchronize: config.get<string>('NODE_ENV') !== 'production',
-                logging: config.get<string>('NODE_ENV') === 'development',
-                // Production (Vercel/Neon) da SSL doim yoqiladi; lokalda DB_SSL=true bo'lsa
-                ssl:
-                    config.get<string>('NODE_ENV') === 'production' ||
-                    config.get<string>('DB_SSL') === 'true'
+            useFactory: (config: ConfigService) => {
+                const url = config.get<string>('DATABASE_URL');
+                // SSL: DB_SSL=false bo'lsa o'chiriladi; aks holda production yoki
+                // DB_SSL=true bo'lsa yoqiladi (Neon majburiy, Railway ham qo'llab-quvvatlaydi).
+                const ssl =
+                    config.get<string>('DB_SSL') !== 'false' &&
+                    (config.get<string>('NODE_ENV') === 'production' ||
+                        config.get<string>('DB_SSL') === 'true')
                         ? { rejectUnauthorized: false }
-                        : false,
-            }),
+                        : false;
+                const base = {
+                    type: 'postgres' as const,
+                    entities: [User, Product, Gift, Purchase, GiftPurchase, AppSetting, Admin],
+                    synchronize: config.get<string>('NODE_ENV') !== 'production',
+                    logging: config.get<string>('NODE_ENV') === 'development',
+                    ssl,
+                };
+                // DATABASE_URL berilsa — uni ishlatamiz (bot_backend bilan bir xil),
+                // aks holda alohida DB_* qiymatlari.
+                return url
+                    ? { ...base, url }
+                    : {
+                          ...base,
+                          host: config.get<string>('DB_HOST', 'localhost'),
+                          port: config.get<number>('DB_PORT', 5432),
+                          username: config.get<string>('DB_USERNAME', 'postgres'),
+                          password: config.get<string>('DB_PASSWORD', ''),
+                          database: config.get<string>('DB_NAME', 'bot_loyiha'),
+                      };
+            },
         }),
         TelegrafModule.forRootAsync({
             inject: [ConfigService],
