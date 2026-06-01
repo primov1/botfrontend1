@@ -21,10 +21,8 @@ export class AuthService {
 
     sign(payload: AuthPayload): { token: string; ttl: number } {
         const ttl = Number(this.config.get<string>('JWT_TTL', '86400'));
-        const token = this.jwt.sign(payload, {
-            secret: this.config.get<string>('JWT_SECRET'),
-            expiresIn: ttl,
-        });
+        // Maxfiy kalit JwtModule registratsiyasidan olinadi (resolveJwtSecret).
+        const token = this.jwt.sign(payload, { expiresIn: ttl });
         return { token, ttl };
     }
 }

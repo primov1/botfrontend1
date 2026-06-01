@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import { parseCookies } from './cookie.util';
 
@@ -13,10 +12,7 @@ export interface AuthPayload {
 
 @Injectable()
 export class AdminAuthGuard implements CanActivate {
-    constructor(
-        private readonly jwt: JwtService,
-        private readonly config: ConfigService,
-    ) {}
+    constructor(private readonly jwt: JwtService) {}
 
     canActivate(context: ExecutionContext): boolean {
         const req = context.switchToHttp().getRequest<Request>();
@@ -29,9 +25,8 @@ export class AdminAuthGuard implements CanActivate {
             return false;
         }
         try {
-            const payload = this.jwt.verify<AuthPayload>(token, {
-                secret: this.config.get<string>('JWT_SECRET'),
-            });
+            // Maxfiy kalit JwtModule registratsiyasidan olinadi.
+            const payload = this.jwt.verify<AuthPayload>(token);
             (req as any).admin = payload;
             return true;
         } catch {

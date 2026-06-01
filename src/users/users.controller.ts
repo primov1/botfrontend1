@@ -1,5 +1,5 @@
 import {
-    Body, Controller, Delete, Get, Param, ParseIntPipe,
+    Body, Controller, Get, Param, ParseIntPipe,
     Post, Query, Res, UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
@@ -37,10 +37,18 @@ export class UsersController {
     }
 
     @Get(':id')
-    async show(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    async show(
+        @Param('id', ParseIntPipe) id: number,
+        @Query('msg_sent') msgSent: string,
+        @Query('msg_error') msgError: string,
+        @Res() res: Response,
+    ) {
         const profile = await this.usersService.profile(id);
         return res.render('user-profile', {
             title: 'Foydalanuvchi profili', active: 'users', ...profile,
+            // broadcast/user/:id yuborilgandan keyin qaytadigan bayroqlar
+            msg_sent: msgSent === '1',
+            msg_error: msgError === '1' || msgSent === '0',
         });
     }
 

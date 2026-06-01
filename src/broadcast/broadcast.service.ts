@@ -33,13 +33,9 @@ export class BroadcastService {
 
         for (const user of users) {
             if (!user.telegramId) { failed++; continue; }
-            try {
-                await this.bot.telegram.sendMessage(user.telegramId, message, {
-                    parse_mode: 'HTML',
-                });
+            if (await this.deliver(user.telegramId, message)) {
                 sent++;
-            } catch (err) {
-                this.logger.warn(`Yuborilmadi (userId=${user.id}): ${(err as Error).message}`);
+            } else {
                 failed++;
             }
             // Telegram rate limit: 30 msg/sec
@@ -50,13 +46,30 @@ export class BroadcastService {
     }
 
     async sendToOne(telegramId: number, message: string): Promise<boolean> {
+        return this.deliver(telegramId, message);
+    }
+
+    /**
+     * Xabarni avval HTML sifatida yuboradi. Agar admin matnida HTML noto'g'ri
+     * bo'lsa (Telegram "can't parse entities" xatosi), xabar yo'qolib ketmasligi
+     * uchun oddiy matn sifatida qayta yuboradi.
+     */
+    private async deliver(telegramId: number, message: string): Promise<boolean> {
         try {
-            await this.bot.telegram.sendMessage(telegramId, message, {
-                parse_mode: 'HTML',
-            });
+            await this.bot.telegram.sendMessage(telegramId, message, { parse_mode: 'HTML' });
             return true;
         } catch (err) {
-            this.logger.warn(`Yuborilmadi (telegramId=${telegramId}): ${(err as Error).message}`);
+            const msg = (err as Error).message ?? '';
+            if (/parse|entities/i.test(msg)) {
+                try {
+                    await this.bot.telegram.sendMessage(telegramId, message);
+                    return true;
+                } catch (err2) {
+                    this.logger.warn(`Yuborilmadi (telegramId=${telegramId}): ${(err2 as Error).message}`);
+                    return false;
+                }
+            }
+            this.logger.warn(`Yuborilmadi (telegramId=${telegramId}): ${msg}`);
             return false;
         }
     }

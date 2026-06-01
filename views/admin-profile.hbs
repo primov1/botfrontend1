@@ -16,6 +16,7 @@
   {{#if (eq query.avatar_ok "1")}}<div class="alert alert-success">✅ Profil rasmi yangilandi.</div>{{/if}}
   {{#if (eq query.avatar_removed "1")}}<div class="alert alert-success">✅ Rasm o'chirildi.</div>{{/if}}
   {{#if (eq query.avatar_error "invalid_file")}}<div class="alert alert-error">❌ Faqat JPG, PNG yoki WEBP (max 5MB).</div>{{/if}}
+  {{#if (eq query.avatar_error "processing")}}<div class="alert alert-error">❌ Rasmni yuklab bo'lmadi. Qayta urinib ko'ring.</div>{{/if}}
 
   {{! === Avatar === }}
   <div class="card" style="margin-bottom:16px">
