@@ -177,7 +177,13 @@ export class ConfirmationsService {
 
         let user = purchase.user;
         if (wasApproved && purchase.bonus > 0) {
-            await this.userRepo.decrement({ id: purchase.userId }, 'bonus', purchase.bonus);
+            // Bonus 0 dan past tushmasin (foydalanuvchi allaqachon sarflagan bo'lishi mumkin)
+            await this.userRepo
+                .createQueryBuilder()
+                .update(User)
+                .set({ bonus: () => `GREATEST("bonus" - ${purchase.bonus}, 0)` })
+                .where('id = :id', { id: purchase.userId })
+                .execute();
             user = await this.userRepo.findOne({ where: { id: purchase.userId } }) ?? user;
         }
 

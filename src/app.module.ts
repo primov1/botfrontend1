@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ScheduleModule } from '@nestjs/schedule';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -23,7 +22,6 @@ import { AdminsModule } from './admins/admins.module';
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
-        ScheduleModule.forRoot(),
         TypeOrmModule.forRootAsync({
             inject: [ConfigService],
             useFactory: (config: ConfigService) => ({
