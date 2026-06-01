@@ -1,0 +1,120 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Adminlar</h2>
+      <p class="page-sub">Admin hisoblarini boshqarish (faqat super admin)</p>
+    </div>
+  </div>
+
+  {{#if (eq query.created "1")}}<div class="alert alert-success">✅ Yangi admin qo'shildi.</div>{{/if}}
+  {{#if (eq query.deleted "1")}}<div class="alert alert-warning">Admin o'chirildi.</div>{{/if}}
+  {{#if (eq query.limit_ok "1")}}<div class="alert alert-success">✅ Limit yangilandi.</div>{{/if}}
+  {{#if query.error}}<div class="alert alert-error">❌ {{query.error}}</div>{{/if}}
+
+  {{! === Limit === }}
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><h3 class="card-title">⚙️ Maksimal admin soni</h3></div>
+    <form method="POST" action="/admins/limit" class="form" style="flex-direction:row;align-items:flex-end;gap:12px;flex-wrap:wrap">
+      <label class="field" style="margin:0">
+        <span class="field-label">Limit</span>
+        <input class="input" type="number" name="max" value="{{max}}" min="{{count}}" step="1"
+               required style="max-width:140px">
+      </label>
+      <button class="btn btn-primary" type="submit">💾 Saqlash</button>
+      <span class="field-hint" style="margin-bottom:10px">Hozir: {{count}} / {{max}} ta admin</span>
+    </form>
+  </div>
+
+  {{! === Yangi admin === }}
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header">
+      <h3 class="card-title">➕ Yangi admin qo'shish</h3>
+      {{#if limitReached}}<span class="badge badge-muted">Limit to'ldi</span>{{/if}}
+    </div>
+    {{#if limitReached}}
+      <p class="field-hint" style="padding:0 4px">
+        Admin limiti to'lgan ({{count}}/{{max}}). Yangi admin qo'shish uchun limitni oshiring
+        yoki mavjud adminni o'chiring.
+      </p>
+    {{else}}
+      <form method="POST" action="/admins/new" class="form">
+        <div class="grid-2">
+          <label class="field">
+            <span class="field-label">Login <span class="req">*</span></span>
+            <input class="input" type="text" name="login" required minlength="3" autocomplete="off"
+                   placeholder="Kamida 3 ta belgi">
+          </label>
+          <label class="field">
+            <span class="field-label">Ism</span>
+            <input class="input" type="text" name="name" placeholder="To'liq ism (ixtiyoriy)">
+          </label>
+        </div>
+        <div class="grid-2">
+          <label class="field">
+            <span class="field-label">Parol <span class="req">*</span></span>
+            <input class="input" type="password" name="password" required minlength="6"
+                   autocomplete="new-password" placeholder="Kamida 6 ta belgi">
+          </label>
+          <label class="field">
+            <span class="field-label">Telefon raqam <span class="req">*</span></span>
+            <input class="input" type="tel" name="phone" required placeholder="+998 90 123 45 67">
+          </label>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">➕ Qo'shish</button>
+        </div>
+      </form>
+    {{/if}}
+  </div>
+
+  {{! === Ro'yxat === }}
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Mavjud adminlar</h3>
+      <span class="badge">{{count}}</span>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="num">#</th>
+            <th>Login</th>
+            <th>Ism</th>
+            <th>Telefon</th>
+            <th>Rol</th>
+            <th>Qo'shilgan</th>
+            <th class="actions">Amallar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each admins}}
+            <tr>
+              <td class="num">{{inc @index}}</td>
+              <td><code>{{login}}</code></td>
+              <td>{{#if name}}{{name}}{{else}}<span class="muted">—</span>{{/if}}</td>
+              <td>{{#if phone}}{{phone}}{{else}}<span class="muted">—</span>{{/if}}</td>
+              <td>
+                {{#if isSuper}}
+                  <span class="status-badge status-approved">Super admin</span>
+                {{else}}
+                  <span class="status-badge status-pending">Admin</span>
+                {{/if}}
+              </td>
+              <td class="muted">{{formatDate createdAt}}</td>
+              <td class="actions">
+                {{#if isSuper}}
+                  <span class="muted">—</span>
+                {{else}}
+                  <form method="POST" action="/admins/{{id}}/delete" style="display:inline"
+                        data-confirm="Bu adminni o'chirishni tasdiqlaysizmi?">
+                    <button type="submit" class="btn btn-sm btn-danger">O'chirish</button>
+                  </form>
+                {{/if}}
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

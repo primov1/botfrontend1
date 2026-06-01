@@ -1,18 +1,19 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { ConfirmationsService } from './confirmations.service';
-import { AdminProfileService } from '../auth/admin-profile.service';
+import { AdminsService } from '../admins/admins.service';
 
 @Injectable()
 export class PendingCountInterceptor implements NestInterceptor {
     constructor(
         private readonly confirmationsService: ConfirmationsService,
-        private readonly adminProfileService: AdminProfileService,
+        private readonly adminsService: AdminsService,
     ) {}
 
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
         if (context.getType() === 'http') {
+            const req = context.switchToHttp().getRequest<Request>();
             const res = context.switchToHttp().getResponse<Response>();
             if (res?.locals) {
                 try {
@@ -20,7 +21,12 @@ export class PendingCountInterceptor implements NestInterceptor {
                 } catch {
                     res.locals.pendingConfirmations = 0;
                 }
-                res.locals.adminProfile = this.adminProfileService.getProfile();
+                // Joriy admin profili (sidebar/topbar uchun) — guard o'rnatgan req.admin'dan
+                const login = (req as any).admin?.sub as string | undefined;
+                if (login) {
+                    const admin = await this.adminsService.findByLogin(login);
+                    res.locals.adminProfile = admin ? AdminsService.toPublic(admin) : null;
+                }
             }
         }
         return next.handle();

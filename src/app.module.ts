@@ -17,6 +17,8 @@ import { Gift } from './common/entities/gift.entity';
 import { Purchase } from './common/entities/purchase.entity';
 import { GiftPurchase } from './common/entities/gift-purchase.entity';
 import { AppSetting } from './common/entities/app-setting.entity';
+import { Admin } from './common/entities/admin.entity';
+import { AdminsModule } from './admins/admins.module';
 
 @Module({
     imports: [
@@ -31,7 +33,7 @@ import { AppSetting } from './common/entities/app-setting.entity';
                 username: config.get<string>('DB_USERNAME', 'postgres'),
                 password: config.get<string>('DB_PASSWORD', ''),
                 database: config.get<string>('DB_NAME', 'bot_loyiha'),
-                entities: [User, Product, Gift, Purchase, GiftPurchase, AppSetting],
+                entities: [User, Product, Gift, Purchase, GiftPurchase, AppSetting, Admin],
                 synchronize: config.get<string>('NODE_ENV') !== 'production',
                 logging: config.get<string>('NODE_ENV') === 'development',
                 ssl: config.get<string>('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
@@ -44,6 +46,7 @@ import { AppSetting } from './common/entities/app-setting.entity';
                 launchOptions: false,
             }),
         }),
+        AdminsModule,
         AuthModule,
         UsersModule,
         ProductsModule,

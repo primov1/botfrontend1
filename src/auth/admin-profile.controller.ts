@@ -1,12 +1,12 @@
 import {
-    Body, Controller, Get, Post, Query, Res, UseGuards,
+    Body, Controller, Get, Post, Query, Req, Res, UseGuards,
     UploadedFile, UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { memoryStorage } from 'multer';
 import { AdminAuthGuard } from '../common/auth.guard';
-import { AdminProfileService } from './admin-profile.service';
+import { AdminsService } from '../admins/admins.service';
 import { AuthService } from './auth.service';
 import { AUTH_COOKIE } from '../common/auth.guard';
 import sharp from 'sharp';
@@ -15,28 +15,34 @@ import sharp from 'sharp';
 @UseGuards(AdminAuthGuard)
 export class AdminProfileController {
     constructor(
-        private readonly profileService: AdminProfileService,
+        private readonly adminsService: AdminsService,
         private readonly authService: AuthService,
     ) {}
 
+    private currentLogin(req: Request): string {
+        return ((req as any).admin?.sub as string) ?? '';
+    }
+
     @Get()
-    show(@Query() query: Record<string, string>, @Res() res: Response) {
+    async show(@Req() req: Request, @Query() query: Record<string, string>, @Res() res: Response) {
+        const admin = await this.adminsService.findByLogin(this.currentLogin(req));
         return res.render('admin-profile', {
             title: 'Admin profil', active: 'admin-profile',
-            profile: this.profileService.getProfile(), query,
+            profile: admin ? AdminsService.toPublic(admin) : null, query,
         });
     }
 
     @Post('name')
-    updateName(@Body('name') name: string, @Res() res: Response) {
+    async updateName(@Req() req: Request, @Body('name') name: string, @Res() res: Response) {
         const t = (name ?? '').trim();
         if (!t) return res.redirect('/admin/profile?name_error=1');
-        this.profileService.updateName(t);
+        await this.adminsService.updateName(this.currentLogin(req), t);
         return res.redirect('/admin/profile?name_ok=1');
     }
 
     @Post('credentials')
-    updateCredentials(
+    async updateCredentials(
+        @Req() req: Request,
         @Body('currentPassword') currentPassword: string,
         @Body('newLogin') newLogin: string,
         @Body('newPassword') newPassword: string,
@@ -44,8 +50,10 @@ export class AdminProfileController {
         @Body('phone') phone: string,
         @Res() res: Response,
     ) {
-        if (!this.profileService.validatePassword(currentPassword ?? ''))
-            return res.redirect('/admin/profile?cred_error=wrong_current');
+        const login = this.currentLogin(req);
+
+        const admin = await this.adminsService.validateCredentials(login, currentPassword ?? '');
+        if (!admin) return res.redirect('/admin/profile?cred_error=wrong_current');
 
         const loginVal = (newLogin ?? '').trim();
         const passVal  = (newPassword ?? '').trim();
@@ -64,12 +72,22 @@ export class AdminProfileController {
                 return res.redirect('/admin/profile?cred_error=pass_mismatch');
         }
 
-        this.profileService.updateLogin(loginVal);
-        this.profileService.updatePhone(phoneVal);
-        if (passVal) this.profileService.updatePassword(passVal);
+        let updatedLogin: string;
+        try {
+            updatedLogin = await this.adminsService.applyProfileUpdate(login, {
+                newLogin: loginVal,
+                phone: phoneVal,
+                newPassword: passVal || undefined,
+            });
+        } catch (err: any) {
+            if (err?.message === 'login_taken')
+                return res.redirect('/admin/profile?cred_error=login_taken');
+            return res.redirect('/admin/profile?cred_error=unknown');
+        }
 
+        // Login (JWT sub) o'zgargan bo'lishi mumkin — cookie'ni qayta imzolaymiz
         const { token, ttl } = this.authService.sign({
-            sub: this.profileService.getLogin(), role: 'admin',
+            sub: updatedLogin, role: 'admin', isSuper: admin.isSuper,
         });
         res.cookie(AUTH_COOKIE, token, {
             httpOnly: true, sameSite: 'lax',
@@ -87,7 +105,7 @@ export class AdminProfileController {
             cb(null, ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype));
         },
     }))
-    async uploadAvatar(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
+    async uploadAvatar(@Req() req: Request, @UploadedFile() file: Express.Multer.File, @Res() res: Response) {
         if (!file) return res.redirect('/admin/profile?avatar_error=invalid_file');
         try {
             const resized = await sharp(file.buffer)
@@ -109,7 +127,7 @@ export class AdminProfileController {
             if (!json?.success) throw new Error('ImgBB upload failed');
 
             const imageUrl: string = json.data.display_url;
-            this.profileService.saveAvatar(imageUrl);
+            await this.adminsService.setAvatar(this.currentLogin(req), imageUrl);
             return res.redirect('/admin/profile?avatar_ok=1');
         } catch {
             return res.redirect('/admin/profile?avatar_error=processing');
@@ -117,8 +135,8 @@ export class AdminProfileController {
     }
 
     @Post('avatar/remove')
-    removeAvatar(@Res() res: Response) {
-        this.profileService.removeAvatar();
+    async removeAvatar(@Req() req: Request, @Res() res: Response) {
+        await this.adminsService.removeAvatar(this.currentLogin(req));
         return res.redirect('/admin/profile?avatar_removed=1');
     }
 }

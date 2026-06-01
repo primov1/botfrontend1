@@ -8,6 +8,7 @@ export const AUTH_COOKIE = 'admin_token';
 export interface AuthPayload {
     sub: string;
     role: 'admin';
+    isSuper: boolean;
 }
 
 @Injectable()

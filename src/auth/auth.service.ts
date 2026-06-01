@@ -2,21 +2,20 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { AuthPayload } from '../common/auth.guard';
-import { AdminProfileService } from './admin-profile.service';
+import { AdminsService } from '../admins/admins.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly config: ConfigService,
         private readonly jwt: JwtService,
-        private readonly profileService: AdminProfileService,
+        private readonly adminsService: AdminsService,
     ) {}
 
-    validate(login: string, password: string): AuthPayload {
-        const isValid = login === this.profileService.getLogin()
-            && this.profileService.validatePassword(password);
-        if (!isValid) throw new UnauthorizedException("Login yoki parol noto'g'ri");
-        return { sub: login, role: 'admin' };
+    async validate(login: string, password: string): Promise<AuthPayload> {
+        const admin = await this.adminsService.validateCredentials(login, password);
+        if (!admin) throw new UnauthorizedException("Login yoki parol noto'g'ri");
+        return { sub: admin.login, role: 'admin', isSuper: admin.isSuper };
     }
 
     sign(payload: AuthPayload): { token: string; ttl: number } {

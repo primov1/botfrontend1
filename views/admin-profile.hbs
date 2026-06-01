@@ -12,6 +12,8 @@
   {{#if (eq query.cred_error "wrong_current")}}<div class="alert alert-error">❌ Joriy parol noto'g'ri.</div>{{/if}}
   {{#if (eq query.cred_error "login_short")}}<div class="alert alert-error">❌ Login kamida 3 ta belgi bo'lishi kerak.</div>{{/if}}
   {{#if (eq query.cred_error "phone_required")}}<div class="alert alert-error">❌ Telefon raqamni kiriting.</div>{{/if}}
+  {{#if (eq query.cred_error "login_taken")}}<div class="alert alert-error">❌ Bu login allaqachon band.</div>{{/if}}
+  {{#if (eq query.cred_error "unknown")}}<div class="alert alert-error">❌ Saqlashda xatolik yuz berdi.</div>{{/if}}
   {{#if (eq query.cred_error "pass_short")}}<div class="alert alert-error">❌ Yangi parol kamida 6 ta belgi bo'lishi kerak.</div>{{/if}}
   {{#if (eq query.cred_error "pass_mismatch")}}<div class="alert alert-error">❌ Yangi parollar mos kelmadi.</div>{{/if}}
   {{#if (eq query.avatar_ok "1")}}<div class="alert alert-success">✅ Profil rasmi yangilandi.</div>{{/if}}
