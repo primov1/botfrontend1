@@ -18,13 +18,36 @@ export class DashboardController {
 
     @Get('/')
     async index(@Res() res: Response) {
-        const [usersCount, productsCount, giftsCount, confirmCounts] =
-            await Promise.all([
-                this.usersService.count(),
-                this.productsService.count(),
-                this.giftsService.count(),
-                this.confirmationsService.counts(),
-            ]);
+        const [
+            usersCount,
+            productsCount,
+            giftsCount,
+            confirmCounts,
+            topUsers,
+            topProducts,
+            dailySales,
+            regStats,
+        ] = await Promise.all([
+            this.usersService.count(),
+            this.productsService.count(),
+            this.giftsService.count(),
+            this.confirmationsService.counts(),
+            this.usersService.topBonusUsers(),
+            this.productsService.topSoldProducts(),
+            this.productsService.dailySalesStats(),
+            this.usersService.registrationStats(),
+        ]);
+
+        // Grafiklar uchun JSON string'ga o'giramiz (HBS template ichida xavfsiz)
+        const salesChartData = JSON.stringify({
+            labels: dailySales.map(d => d.day.slice(5)),   // MM-DD
+            sales:  dailySales.map(d => d.count),
+            bonus:  dailySales.map(d => d.bonusTotal),
+        });
+        const regChartData = JSON.stringify({
+            labels: regStats.map(d => d.day.slice(5)),
+            counts: regStats.map(d => d.count),
+        });
 
         return res.render('dashboard', {
             title: 'Boshqaruv paneli',
@@ -34,7 +57,12 @@ export class DashboardController {
                 products: productsCount,
                 gifts: giftsCount,
                 pending: confirmCounts.pending,
+                approved: confirmCounts.approved,
             },
+            topUsers,
+            topProducts,
+            salesChartData,
+            regChartData,
         });
     }
 }

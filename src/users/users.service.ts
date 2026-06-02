@@ -91,6 +91,44 @@ export class UsersService {
         return this.userRepo.count();
     }
 
+    /** Foydalanuvchilar statistikasi: oxirgi 30 kun ichida nechta yangi user. */
+    async registrationStats(): Promise<{ day: string; count: number }[]> {
+        const rows = await this.userRepo
+            .createQueryBuilder('u')
+            .select("TO_CHAR(u.\"createdAt\"::date, 'YYYY-MM-DD')", 'day')
+            .addSelect('COUNT(*)', 'count')
+            .where("u.\"createdAt\" >= NOW() - INTERVAL '30 days'")
+            .groupBy("TO_CHAR(u.\"createdAt\"::date, 'YYYY-MM-DD')")
+            .orderBy('day', 'ASC')
+            .getRawMany();
+        return rows.map(r => ({ day: r.day as string, count: Number(r.count) }));
+    }
+
+    /** Foydalanuvchilar bonus statistikasi: top 10 ta eng ko'p bonus to'plagan. */
+    async topBonusUsers(): Promise<{ id: number; name: string; bonus: number; orders: number }[]> {
+        const rows = await this.userRepo
+            .createQueryBuilder('u')
+            .leftJoin(
+                'purchases', 'p',
+                'p."userId" = u.id AND p.status = :status',
+                { status: 'approved' },
+            )
+            .select('u.id', 'id')
+            .addSelect("COALESCE(u.\"firstName\", '') || ' ' || COALESCE(u.\"lastName\", '')", 'name')
+            .addSelect('u.bonus', 'bonus')
+            .addSelect('COUNT(p.id)', 'orders')
+            .groupBy('u.id')
+            .orderBy('u.bonus', 'DESC')
+            .limit(10)
+            .getRawMany();
+        return rows.map(r => ({
+            id: Number(r.id),
+            name: (r.name as string).trim() || 'Nomsiz',
+            bonus: Number(r.bonus),
+            orders: Number(r.orders),
+        }));
+    }
+
     async exportExcel(q?: string): Promise<ExcelJS.Buffer> {
         const term = (q ?? '').trim();
         const where = term

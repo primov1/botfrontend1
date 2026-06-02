@@ -102,4 +102,51 @@ export class ProductsService {
     async count() {
         return this.productRepo.count();
     }
+
+    /** Oxirgi 30 kun ichida eng ko'p sotilgan (tasdiqlangan) mahsulotlar top 10. */
+    async topSoldProducts(): Promise<{ id: number; title: string; sold: number; bonusTotal: number }[]> {
+        const rows = await this.productRepo
+            .createQueryBuilder('pr')
+            .innerJoin(
+                'purchases', 'p',
+                'p."productId" = pr.id AND p.status = :status AND p."createdAt" >= NOW() - INTERVAL \'30 days\'',
+                { status: 'approved' },
+            )
+            .select('pr.id', 'id')
+            .addSelect('pr.title', 'title')
+            .addSelect('COUNT(p.id)', 'sold')
+            .addSelect('SUM(p.bonus)', 'bonusTotal')
+            .groupBy('pr.id')
+            .orderBy('sold', 'DESC')
+            .limit(10)
+            .getRawMany();
+        return rows.map(r => ({
+            id: Number(r.id),
+            title: r.title as string,
+            sold: Number(r.sold),
+            bonusTotal: Number(r.bonusTotal),
+        }));
+    }
+
+    /** Oxirgi 30 kun ichida kunlik sotilgan mahsulotlar grafigi. */
+    async dailySalesStats(): Promise<{ day: string; count: number; bonusTotal: number }[]> {
+        const rows = await this.productRepo
+            .createQueryBuilder('pr')
+            .innerJoin(
+                'purchases', 'p',
+                'p."productId" = pr.id AND p.status = :status AND p."createdAt" >= NOW() - INTERVAL \'30 days\'',
+                { status: 'approved' },
+            )
+            .select("TO_CHAR(p.\"createdAt\"::date, 'YYYY-MM-DD')", 'day')
+            .addSelect('COUNT(p.id)', 'count')
+            .addSelect('SUM(p.bonus)', 'bonusTotal')
+            .groupBy("TO_CHAR(p.\"createdAt\"::date, 'YYYY-MM-DD')")
+            .orderBy('day', 'ASC')
+            .getRawMany();
+        return rows.map(r => ({
+            day: r.day as string,
+            count: Number(r.count),
+            bonusTotal: Number(r.bonusTotal),
+        }));
+    }
 }

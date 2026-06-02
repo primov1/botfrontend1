@@ -6,6 +6,7 @@
     </div>
   </div>
 
+  {{! === Umumiy statistika kartalari === }}
   <div class="stats">
     <a class="stat stat-blue" href="/users">
       <div class="stat-icon">
@@ -37,7 +38,7 @@
       </div>
     </a>
 
-    <a class="stat stat-amber" href="/confirmations">
+    <a class="stat stat-amber" href="/confirmations?status=pending">
       <div class="stat-icon">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       </div>
@@ -46,8 +47,118 @@
         <div class="stat-value">{{stats.pending}}</div>
       </div>
     </a>
+
+    <a class="stat stat-teal" href="/confirmations?status=approved">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="stat-body">
+        <div class="stat-label">{{t 'stat_approved'}}</div>
+        <div class="stat-value">{{stats.approved}}</div>
+      </div>
+    </a>
   </div>
 
+  {{! === Grafiklar (30 kun) === }}
+  <div class="stats" style="align-items:stretch;margin-top:0">
+    <div class="card" style="flex:1;min-width:0;padding:18px 20px">
+      <div class="card-header" style="padding:0 0 12px">
+        <h3 class="card-title">{{t 'chart_sales_title'}}</h3>
+        <span class="badge badge-muted">{{t 'stat_30days'}}</span>
+      </div>
+      <canvas id="salesChart" height="80"></canvas>
+    </div>
+    <div class="card" style="flex:1;min-width:0;padding:18px 20px">
+      <div class="card-header" style="padding:0 0 12px">
+        <h3 class="card-title">{{t 'chart_reg_title'}}</h3>
+        <span class="badge badge-muted">{{t 'stat_30days'}}</span>
+      </div>
+      <canvas id="regChart" height="80"></canvas>
+    </div>
+  </div>
+
+  {{! === Top jadvallar === }}
+  <div class="profile-grid" style="margin-top:0">
+
+    {{! Top mahsulotlar }}
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">{{t 'top_products_title'}}</h3>
+        <span class="badge badge-muted">{{t 'stat_30days'}}</span>
+      </div>
+      {{#if topProducts.length}}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="num">#</th>
+              <th>{{t 'name'}}</th>
+              <th>{{t 'col_sold'}}</th>
+              <th>{{t 'col_bonus_given'}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each topProducts}}
+            <tr>
+              <td class="num">
+                {{#if (eq @index 0)}}<span style="font-size:16px">🥇</span>
+                {{else}}{{#if (eq @index 1)}}<span style="font-size:16px">🥈</span>
+                {{else}}{{#if (eq @index 2)}}<span style="font-size:16px">🥉</span>
+                {{else}}<span class="muted">{{inc @index}}</span>{{/if}}{{/if}}{{/if}}
+              </td>
+              <td><a href="/products/{{id}}/edit" class="muted-link">{{title}}</a></td>
+              <td><span class="bonus-pill">{{sold}}</span></td>
+              <td><span class="price-pill">+{{formatPrice bonusTotal}}</span></td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+      {{else}}
+      <div class="empty"><div class="empty-title">{{t 'no_data'}}</div></div>
+      {{/if}}
+    </div>
+
+    {{! Top foydalanuvchilar }}
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">{{t 'top_users_title'}}</h3>
+      </div>
+      {{#if topUsers.length}}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="num">#</th>
+              <th>{{t 'name'}}</th>
+              <th>{{t 'col_orders'}}</th>
+              <th>{{t 'col_balance'}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each topUsers}}
+            <tr>
+              <td class="num">
+                {{#if (eq @index 0)}}<span style="font-size:16px">🥇</span>
+                {{else}}{{#if (eq @index 1)}}<span style="font-size:16px">🥈</span>
+                {{else}}{{#if (eq @index 2)}}<span style="font-size:16px">🥉</span>
+                {{else}}<span class="muted">{{inc @index}}</span>{{/if}}{{/if}}{{/if}}
+              </td>
+              <td><a href="/users/{{id}}" class="muted-link">{{name}}</a></td>
+              <td>{{orders}}</td>
+              <td><span class="bonus-pill">{{formatPrice bonus}}</span></td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+      {{else}}
+      <div class="empty"><div class="empty-title">{{t 'no_data'}}</div></div>
+      {{/if}}
+    </div>
+  </div>
+
+  {{! === Tezkor amallar === }}
   <div class="quick-actions">
     <h3 class="section-title">{{t 'quick_actions'}}</h3>
     <div class="quick-grid">
@@ -70,3 +181,71 @@
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  const salesRaw = {{{salesChartData}}};
+  const regRaw   = {{{regChartData}}};
+
+  const base = {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+      y: { beginAtZero: true, ticks: { precision: 0, font: { size: 11 } }, grid: { color: '#f1f5f9' } },
+    },
+  };
+
+  if (salesRaw.labels.length) {
+    new Chart(document.getElementById('salesChart'), {
+      type: 'bar',
+      data: {
+        labels: salesRaw.labels,
+        datasets: [{
+          label: 'Sotuvlar',
+          data: salesRaw.sales,
+          backgroundColor: 'rgba(99,102,241,0.75)',
+          borderRadius: 4,
+        }],
+      },
+      options: base,
+    });
+  } else {
+    document.getElementById('salesChart').parentElement.innerHTML +=
+      '<p style="text-align:center;color:#94a3b8;padding:24px 0">—</p>';
+    document.getElementById('salesChart').style.display = 'none';
+  }
+
+  if (regRaw.labels.length) {
+    new Chart(document.getElementById('regChart'), {
+      type: 'line',
+      data: {
+        labels: regRaw.labels,
+        datasets: [{
+          label: "Ro'yxatdan o'tishlar",
+          data: regRaw.counts,
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,0.1)',
+          borderWidth: 2,
+          pointRadius: 3,
+          fill: true,
+          tension: 0.35,
+        }],
+      },
+      options: base,
+    });
+  } else {
+    document.getElementById('regChart').parentElement.innerHTML +=
+      '<p style="text-align:center;color:#94a3b8;padding:24px 0">—</p>';
+    document.getElementById('regChart').style.display = 'none';
+  }
+})();
+</script>
+
+<style>
+.muted-link { color: inherit; text-decoration: none; }
+.muted-link:hover { color: var(--primary, #6366f1); }
+.profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .profile-grid { grid-template-columns: 1fr; } }
+</style>
