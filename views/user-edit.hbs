@@ -1,37 +1,37 @@
 <div class="page page-narrow">
   <div class="page-header">
     <div>
-      <h2 class="page-title">Foydalanuvchini tahrirlash</h2>
-      <p class="page-sub">Ism, familiya yoki telefon raqamni o‘zgartirish</p>
+      <h2 class="page-title">{{t 'user_edit_title'}}</h2>
+      <p class="page-sub">{{t 'user_edit_sub'}}</p>
     </div>
-    <a class="btn btn-ghost" href="/users">← Ro‘yxatga qaytish</a>
+    <a class="btn btn-ghost" href="/users">{{t 'back_to_list'}}</a>
   </div>
 
   <div class="card">
     <form method="POST" action="/users/{{user.id}}" class="form">
       <div class="grid-2">
         <label class="field">
-          <span class="field-label">Ism</span>
+          <span class="field-label">{{t 'col_firstname'}}</span>
           <input class="input" type="text" name="firstName" value="{{user.firstName}}" />
         </label>
         <label class="field">
-          <span class="field-label">Familiya</span>
+          <span class="field-label">{{t 'col_lastname'}}</span>
           <input class="input" type="text" name="lastName" value="{{user.lastName}}" />
         </label>
       </div>
       <label class="field">
-        <span class="field-label">Telefon raqam</span>
+        <span class="field-label">{{t 'phone_label'}}</span>
         <input class="input" type="text" name="phone" value="{{user.phone}}" placeholder="+998..." />
       </label>
 
       <div class="field">
-        <span class="field-label">Username</span>
+        <span class="field-label">{{t 'col_username'}}</span>
         <div class="readonly">{{#if user.username}}@{{user.username}}{{else}}—{{/if}}</div>
       </div>
 
       <div class="form-actions">
-        <a class="btn btn-ghost" href="/users">Bekor qilish</a>
-        <button class="btn btn-primary" type="submit">Saqlash</button>
+        <a class="btn btn-ghost" href="/users">{{t 'cancel'}}</a>
+        <button class="btn btn-primary" type="submit">{{t 'save'}}</button>
       </div>
     </form>
   </div>
