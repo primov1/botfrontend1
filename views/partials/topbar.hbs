@@ -1,20 +1,45 @@
 <header class="topbar">
   <h1 class="topbar-title">{{title}}</h1>
   <div class="topbar-actions">
-    <div class="lang-switch" style="display:flex;gap:4px;margin-right:6px">
-      <a href="/lang/uz" title="O‘zbekcha" style="text-decoration:none;font-size:18px;opacity:{{#if (eq lang 'uz')}}1{{else}}0.45{{/if}}">🇺🇿</a>
-      <a href="/lang/ru" title="Русский" style="text-decoration:none;font-size:18px;opacity:{{#if (eq lang 'ru')}}1{{else}}0.45{{/if}}">🇷🇺</a>
-      <a href="/lang/en" title="English" style="text-decoration:none;font-size:18px;opacity:{{#if (eq lang 'en')}}1{{else}}0.45{{/if}}">🇬🇧</a>
+
+    {{! Til almashtirgich }}
+    <div class="lang-pill-group">
+      <a href="/lang/uz" class="lang-pill {{#if (eq lang 'uz')}}lang-pill--active{{/if}}" title="O'zbekcha">
+        <span class="lang-flag">🇺🇿</span>
+        <span class="lang-code">UZ</span>
+      </a>
+      <a href="/lang/ru" class="lang-pill {{#if (eq lang 'ru')}}lang-pill--active{{/if}}" title="Русский">
+        <span class="lang-flag">🇷🇺</span>
+        <span class="lang-code">RU</span>
+      </a>
+      <a href="/lang/en" class="lang-pill {{#if (eq lang 'en')}}lang-pill--active{{/if}}" title="English">
+        <span class="lang-flag">🇬🇧</span>
+        <span class="lang-code">EN</span>
+      </a>
     </div>
+
+    <div class="topbar-divider"></div>
+
+    {{! Admin profil }}
     <a class="topbar-admin" href="/admin/profile">
       <span class="topbar-avatar">
         {{#if adminProfile.avatar}}
-          <img src="{{adminProfile.avatar}}" alt="avatar" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">
+          <img src="{{adminProfile.avatar}}" alt="avatar">
         {{else}}
           {{#if adminProfile.name}}{{adminProfile.name.[0]}}{{else}}A{{/if}}
         {{/if}}
       </span>
-      <span>{{#if adminProfile.name}}{{adminProfile.name}}{{else}}admin{{/if}}</span>
+      <div class="topbar-admin-info">
+        <span class="topbar-admin-name">{{#if adminProfile.name}}{{adminProfile.name}}{{else}}Admin{{/if}}</span>
+        {{#if adminProfile.isSuper}}
+          <span class="topbar-admin-role">Super admin</span>
+        {{else}}
+          <span class="topbar-admin-role">Admin</span>
+        {{/if}}
+      </div>
+      <svg class="topbar-admin-chevron" viewBox="0 0 16 16" fill="none">
+        <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </a>
   </div>
 </header>
