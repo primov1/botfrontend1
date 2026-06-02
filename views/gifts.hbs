@@ -1,21 +1,21 @@
 <div class="page">
   <div class="page-header">
     <div>
-      <h2 class="page-title">Sovg‘alar</h2>
-      <p class="page-sub">Sovg‘alar ro‘yxati va boshqaruvi</p>
+      <h2 class="page-title">{{t 'nav_gifts'}}</h2>
+      <p class="page-sub">{{t 'gifts_sub'}}</p>
     </div>
-    <a class="btn btn-primary" href="/gifts/new">+ Yangi sovg‘a</a>
+    <a class="btn btn-primary" href="/gifts/new">{{t 'new_gift'}}</a>
   </div>
 
-  {{#if created}}<div class="alert alert-success">Yangi sovg‘a qo‘shildi.</div>{{/if}}
-  {{#if updated}}<div class="alert alert-success">Sovg‘a yangilandi.</div>{{/if}}
-  {{#if deleted}}<div class="alert alert-warning">Sovg‘a o‘chirildi.</div>{{/if}}
+  {{#if created}}<div class="alert alert-success">{{t 'gift_created'}}</div>{{/if}}
+  {{#if updated}}<div class="alert alert-success">{{t 'gift_updated'}}</div>{{/if}}
+  {{#if deleted}}<div class="alert alert-warning">{{t 'gift_deleted'}}</div>{{/if}}
 
   <div class="toolbar">
     <form method="GET" action="/gifts" class="search">
-      <input class="input" type="text" name="q" value="{{data.q}}" placeholder="Nomi bo‘yicha qidirish…" />
-      <button class="btn btn-primary" type="submit">Qidirish</button>
-      {{#if data.q}}<a class="btn btn-ghost" href="/gifts">Tozalash</a>{{/if}}
+      <input class="input" type="text" name="q" value="{{data.q}}" placeholder="{{t 'products_search_ph'}}" />
+      <button class="btn btn-primary" type="submit">{{t 'search'}}</button>
+      {{#if data.q}}<a class="btn btn-ghost" href="/gifts">{{t 'clear'}}</a>{{/if}}
     </form>
   </div>
 
@@ -29,12 +29,12 @@
             </div>
             <div class="product-body">
               <h3 class="product-title">{{title}}</h3>
-              <div class="product-price">{{formatPrice price}} so‘m</div>
+              <div class="product-price">{{formatPrice price}} {{t 'som'}}</div>
             </div>
             <div class="product-actions">
-              <a class="btn btn-sm btn-ghost" href="/gifts/{{id}}/edit">Tahrirlash</a>
-              <form method="POST" action="/gifts/{{id}}/delete" data-confirm="Sovg‘ani o‘chirishni tasdiqlaysizmi?">
-                <button type="submit" class="btn btn-sm btn-danger">O‘chirish</button>
+              <a class="btn btn-sm btn-ghost" href="/gifts/{{id}}/edit">{{t 'edit'}}</a>
+              <form method="POST" action="/gifts/{{id}}/delete" data-confirm="{{t 'gift_delete_confirm'}}">
+                <button type="submit" class="btn btn-sm btn-danger">{{t 'delete'}}</button>
               </form>
             </div>
           </div>
@@ -43,9 +43,9 @@
       {{> pagination}}
     {{else}}
       <div class="empty">
-        <div class="empty-title">Sovg‘a topilmadi</div>
-        <div class="empty-sub">{{#if data.q}}Qidiruvga mos sovg‘a yo‘q.{{else}}Birinchi sovg‘ani qo‘shing.{{/if}}</div>
-        <a class="btn btn-primary" href="/gifts/new">+ Sovg‘a qo‘shish</a>
+        <div class="empty-title">{{t 'gifts_empty'}}</div>
+        <div class="empty-sub">{{#if data.q}}{{t 'gifts_empty_search'}}{{else}}{{t 'gifts_empty_none'}}{{/if}}</div>
+        <a class="btn btn-primary" href="/gifts/new">{{t 'add_gift'}}</a>
       </div>
     {{/if}}
   </div>

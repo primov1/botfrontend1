@@ -1,34 +1,34 @@
 <div class="page page-narrow">
   <div class="page-header">
     <div>
-      <h2 class="page-title">Xabar yuborish</h2>
-      <p class="page-sub">Telegram orqali foydalanuvchilarga xabar jo'natish</p>
+      <h2 class="page-title">{{t 'nav_broadcast'}}</h2>
+      <p class="page-sub">{{t 'broadcast_sub'}}</p>
     </div>
   </div>
 
   {{#if result}}
   <div class="alert alert-success">
-    ✅ Yuborildi: <strong>{{result.sent}}</strong> / {{result.total}}
-    {{#if (gt result.failed 0)}} • Xato: <strong>{{result.failed}}</strong>{{/if}}
+    ✅ {{t 'broadcast_sent'}}: <strong>{{result.sent}}</strong> / {{result.total}}
+    {{#if (gt result.failed 0)}} • {{t 'broadcast_error_count'}}: <strong>{{result.failed}}</strong>{{/if}}
   </div>
   {{/if}}
   {{#if error}}<div class="alert alert-error">{{error}}</div>{{/if}}
 
   <div class="card">
     <div class="card-header">
-      <h3 class="card-title">📣 Barcha foydalanuvchilarga</h3>
+      <h3 class="card-title">{{t 'broadcast_all'}}</h3>
     </div>
     <form method="POST" action="/broadcast/all" class="form"
-          data-confirm="Xabar barcha foydalanuvchilarga yuboriladi. Tasdiqlaysizmi?">
+          data-confirm="{{t 'broadcast_confirm'}}">
       <div class="field">
-        <span class="field-label">Xabar matni</span>
+        <span class="field-label">{{t 'message_text'}}</span>
         <textarea class="input" name="message" rows="5"
-                  placeholder="Xabar matnini kiriting...&#10;HTML teglari ishlaydi: &lt;b&gt;qalin&lt;/b&gt;, &lt;i&gt;kursiv&lt;/i&gt;, &lt;a href='...'&gt;havola&lt;/a&gt;"
+                  placeholder="{{t 'broadcast_ph'}}"
                   required></textarea>
-        <span class="field-hint">HTML teglari ishlaydi: &lt;b&gt;, &lt;i&gt;, &lt;a href=""&gt;, &lt;code&gt;</span>
+        <span class="field-hint">{{t 'broadcast_hint'}}</span>
       </div>
       <div class="form-actions">
-        <button class="btn btn-primary" type="submit">📤 Yuborish</button>
+        <button class="btn btn-primary" type="submit">{{t 'send'}}</button>
       </div>
     </form>
   </div>

@@ -1,21 +1,21 @@
 <div class="page">
   <div class="page-header">
     <div>
-      <h2 class="page-title">Mahsulotlar</h2>
-      <p class="page-sub">Mahsulotlar ro'yxati va ijtimoiy tarmoq havolalari</p>
+      <h2 class="page-title">{{t 'nav_products'}}</h2>
+      <p class="page-sub">{{t 'products_sub'}}</p>
     </div>
-    <a class="btn btn-primary" href="/products/new">+ Yangi mahsulot</a>
+    <a class="btn btn-primary" href="/products/new">{{t 'new_product'}}</a>
   </div>
 
-  {{#if created}}<div class="alert alert-success">Yangi mahsulot qo'shildi.</div>{{/if}}
-  {{#if updated}}<div class="alert alert-success">Mahsulot yangilandi.</div>{{/if}}
-  {{#if deleted}}<div class="alert alert-warning">Mahsulot o'chirildi.</div>{{/if}}
+  {{#if created}}<div class="alert alert-success">{{t 'product_created'}}</div>{{/if}}
+  {{#if updated}}<div class="alert alert-success">{{t 'product_updated'}}</div>{{/if}}
+  {{#if deleted}}<div class="alert alert-warning">{{t 'product_deleted'}}</div>{{/if}}
 
   <div class="toolbar">
     <form method="GET" action="/products" class="search">
-      <input class="input" type="text" name="q" value="{{data.q}}" placeholder="Nomi bo'yicha qidirish…" />
-      <button class="btn btn-primary" type="submit">Qidirish</button>
-      {{#if data.q}}<a class="btn btn-ghost" href="/products">Tozalash</a>{{/if}}
+      <input class="input" type="text" name="q" value="{{data.q}}" placeholder="{{t 'products_search_ph'}}" />
+      <button class="btn btn-primary" type="submit">{{t 'search'}}</button>
+      {{#if data.q}}<a class="btn btn-ghost" href="/products">{{t 'clear'}}</a>{{/if}}
     </form>
   </div>
 
@@ -26,12 +26,12 @@
           <thead>
             <tr>
               <th class="num">#</th>
-              <th>Rasm</th>
-              <th>Nomi</th>
-              <th>Bonus</th>
-              <th>Havolalar</th>
-              <th>Qo'shilgan</th>
-              <th class="actions">Amallar</th>
+              <th>{{t 'image'}}</th>
+              <th>{{t 'name'}}</th>
+              <th>{{t 'col_bonus'}}</th>
+              <th>{{t 'col_links'}}</th>
+              <th>{{t 'col_added'}}</th>
+              <th class="actions">{{t 'actions'}}</th>
             </tr>
           </thead>
           <tbody>
@@ -42,12 +42,12 @@
                   {{#if image}}
                     <img src="{{image}}" alt="{{title}}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;" onerror="this.src='/img/placeholder.svg';" />
                   {{else}}
-                    <img src="/img/placeholder.svg" alt="rasm yo'q" style="width:40px;height:40px;opacity:.4;" />
+                    <img src="/img/placeholder.svg" alt="—" style="width:40px;height:40px;opacity:.4;" />
                   {{/if}}
                 </td>
                 <td>
                   <strong>{{title}}</strong>
-                  {{#if requireChannel}}<span class="status-badge status-pending" style="font-size:11px;margin-left:4px">Majburiy obuna</span>{{/if}}
+                  {{#if requireChannel}}<span class="status-badge status-pending" style="font-size:11px;margin-left:4px">{{t 'require_channel_badge'}}</span>{{/if}}
                 </td>
                 <td><span class="bonus-pill">+{{formatPrice bonus}}</span></td>
                 <td>
@@ -69,9 +69,9 @@
                 </td>
                 <td class="muted">{{formatDate createdAt}}</td>
                 <td class="actions">
-                  <a class="btn btn-sm btn-ghost" href="/products/{{id}}/edit">Tahrirlash</a>
-                  <form method="POST" action="/products/{{id}}/delete" data-confirm="Mahsulotni o'chirishni tasdiqlaysizmi?">
-                    <button type="submit" class="btn btn-sm btn-danger">O'chirish</button>
+                  <a class="btn btn-sm btn-ghost" href="/products/{{id}}/edit">{{t 'edit'}}</a>
+                  <form method="POST" action="/products/{{id}}/delete" data-confirm="{{t 'product_delete_confirm'}}">
+                    <button type="submit" class="btn btn-sm btn-danger">{{t 'delete'}}</button>
                   </form>
                 </td>
               </tr>
@@ -82,9 +82,9 @@
       {{> pagination}}
     {{else}}
       <div class="empty">
-        <div class="empty-title">Mahsulot topilmadi</div>
-        <div class="empty-sub">{{#if data.q}}Qidiruvga mos mahsulot yo'q.{{else}}Birinchi mahsulotingizni qo'shing.{{/if}}</div>
-        <a class="btn btn-primary" href="/products/new">+ Mahsulot qo'shish</a>
+        <div class="empty-title">{{t 'products_empty'}}</div>
+        <div class="empty-sub">{{#if data.q}}{{t 'products_empty_search'}}{{else}}{{t 'products_empty_none'}}{{/if}}</div>
+        <a class="btn btn-primary" href="/products/new">{{t 'add_product'}}</a>
       </div>
     {{/if}}
   </div>
