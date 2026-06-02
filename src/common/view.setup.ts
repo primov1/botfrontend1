@@ -1,6 +1,7 @@
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'node:path';
 import hbs from 'hbs';
+import { Lang, normalizeLang, tr } from './i18n';
 
 /**
  * View (hbs) sozlamalari va yordamchi (helper)'larni bitta joyda ro'yxatdan o'tkazadi.
@@ -33,4 +34,10 @@ export function setupView(app: NestExpressApplication, root: string): void {
         });
     });
     hbs.registerHelper('inc', (value: number) => Number(value) + 1);
+
+    // Tarjima: {{t 'key'}} — joriy til res.locals.lang dan olinadi
+    hbs.registerHelper('t', function (this: unknown, key: string, options: any) {
+        const lang: Lang = normalizeLang(options?.data?.root?.lang);
+        return tr(lang, key);
+    });
 }

@@ -3,6 +3,8 @@ import { Observable } from 'rxjs';
 import type { Request, Response } from 'express';
 import { ConfirmationsService } from './confirmations.service';
 import { AdminsService } from '../admins/admins.service';
+import { parseCookies } from '../common/cookie.util';
+import { LANG_COOKIE, normalizeLang } from '../common/i18n';
 
 @Injectable()
 export class PendingCountInterceptor implements NestInterceptor {
@@ -16,6 +18,10 @@ export class PendingCountInterceptor implements NestInterceptor {
             const req = context.switchToHttp().getRequest<Request>();
             const res = context.switchToHttp().getResponse<Response>();
             if (res?.locals) {
+                // Joriy til (cookie'dan) — barcha shablonlar uchun
+                const cookies = parseCookies(req.headers?.cookie);
+                res.locals.lang = normalizeLang(cookies[LANG_COOKIE]);
+
                 try {
                     res.locals.pendingConfirmations = await this.confirmationsService.pendingCount();
                 } catch {

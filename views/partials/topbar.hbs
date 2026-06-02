@@ -1,6 +1,11 @@
 <header class="topbar">
   <h1 class="topbar-title">{{title}}</h1>
   <div class="topbar-actions">
+    <div class="lang-switch" style="display:flex;gap:4px;margin-right:6px">
+      <a href="/lang/uz" title="O‘zbekcha" style="text-decoration:none;font-size:18px;opacity:{{#if (eq lang 'uz')}}1{{else}}0.45{{/if}}">🇺🇿</a>
+      <a href="/lang/ru" title="Русский" style="text-decoration:none;font-size:18px;opacity:{{#if (eq lang 'ru')}}1{{else}}0.45{{/if}}">🇷🇺</a>
+      <a href="/lang/en" title="English" style="text-decoration:none;font-size:18px;opacity:{{#if (eq lang 'en')}}1{{else}}0.45{{/if}}">🇬🇧</a>
+    </div>
     <a class="topbar-admin" href="/admin/profile">
       <span class="topbar-avatar">
         {{#if adminProfile.avatar}}

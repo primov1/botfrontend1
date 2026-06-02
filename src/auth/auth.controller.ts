@@ -2,6 +2,7 @@ import {
     Body,
     Controller,
     Get,
+    Param,
     Post,
     Res,
     Req,
@@ -12,6 +13,7 @@ import { AuthService } from './auth.service';
 import { AdminsService } from '../admins/admins.service';
 import { AUTH_COOKIE, type AuthPayload } from '../common/auth.guard';
 import { parseCookies } from '../common/cookie.util';
+import { LANG_COOKIE, normalizeLang } from '../common/i18n';
 
 @Controller()
 export class AuthController {
@@ -50,7 +52,7 @@ export class AuthController {
                 layout: false,
                 title: 'Kirish',
                 needPhone: await this.adminsService.superAdminLacksPhone(),
-                error: "Login yoki parol noto'g'ri",
+                error: 'login_error',
                 login,
             });
         }
@@ -63,7 +65,7 @@ export class AuthController {
                     layout: false,
                     title: 'Kirish',
                     needPhone: true,
-                    error: 'Telefon raqamingizni kiriting',
+                    error: 'phone_required',
                     login,
                 });
             }
@@ -85,5 +87,18 @@ export class AuthController {
     logout(@Res() res: Response) {
         res.clearCookie(AUTH_COOKIE, { path: '/' });
         return res.redirect('/login');
+    }
+
+    /** Til tanlash: cookie'ga saqlanadi va oldingi sahifaga qaytariladi. */
+    @Get('lang/:lang')
+    setLang(@Param('lang') lang: string, @Req() req: Request, @Res() res: Response) {
+        res.cookie(LANG_COOKIE, normalizeLang(lang), {
+            httpOnly: false,
+            sameSite: 'lax',
+            maxAge: 365 * 24 * 60 * 60 * 1000,
+            path: '/',
+        });
+        const back = req.headers.referer || '/';
+        return res.redirect(back);
     }
 }
