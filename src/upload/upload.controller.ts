@@ -23,13 +23,17 @@ export class UploadController {
                 .jpeg({ quality: 85 })
                 .toBuffer();
 
+            const apiKey = process.env.IMGBB_API_KEY;
+            if (!apiKey) return { success: false, error: 'IMGBB_API_KEY sozlanmagan' };
+
             const body = new URLSearchParams();
-            body.append('key', process.env.IMGBB_API_KEY ?? '');
+            body.append('key', apiKey);
             body.append('image', optimized.toString('base64'));
 
             const response = await fetch('https://api.imgbb.com/1/upload', {
                 method: 'POST',
                 body,
+                signal: AbortSignal.timeout(15_000),
             });
             const json = await response.json() as any;
             if (!json?.success) throw new Error('ImgBB xatosi');

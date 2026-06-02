@@ -34,7 +34,9 @@ export class AdminsController {
             await this.adminsService.setMaxAdmins(Number(max));
             return res.redirect('/admins?limit_ok=1');
         } catch (err: any) {
-            return res.redirect('/admins?error=' + encodeURIComponent(err?.message || 'Xatolik'));
+            return res.redirect('/admins?error=' + encodeURIComponent(
+                (err?.message || 'Xatolik').substring(0, 120),
+            ));
         }
     }
 
@@ -50,7 +52,9 @@ export class AdminsController {
             await this.adminsService.createAdmin({ login, password, name, phone });
             return res.redirect('/admins?created=1');
         } catch (err: any) {
-            return res.redirect('/admins?error=' + encodeURIComponent(err?.message || 'Xatolik'));
+            return res.redirect('/admins?error=' + encodeURIComponent(
+                (err?.message || 'Xatolik').substring(0, 120),
+            ));
         }
     }
 
@@ -60,7 +64,9 @@ export class AdminsController {
             await this.adminsService.deleteAdmin(id);
             return res.redirect('/admins?deleted=1');
         } catch (err: any) {
-            return res.redirect('/admins?error=' + encodeURIComponent(err?.message || 'Xatolik'));
+            return res.redirect('/admins?error=' + encodeURIComponent(
+                (err?.message || 'Xatolik').substring(0, 120),
+            ));
         }
     }
 }

@@ -166,37 +166,48 @@ export class ConfirmationsService {
     }
 
     async reject(id: number, note = '') {
-        const purchase = await this.purchaseRepo.findOne({
-            where: { id },
-            relations: ['product', 'user'],
+        let notifyTelegramId: number | undefined;
+        let notifyText = '';
+
+        // Bonus yechish + status o'zgartirish — tranzaksiyada (atomik)
+        const updated = await this.dataSource.transaction(async (em) => {
+            const purchase = await em.findOne(Purchase, {
+                where: { id },
+                relations: ['product', 'user'],
+                lock: { mode: 'pessimistic_write' },
+            });
+            if (!purchase) throw new NotFoundException('Yozuv topilmadi');
+
+            const wasApproved = purchase.status === 'approved';
+            const alreadyRejected = purchase.status === 'rejected';
+
+            if (wasApproved && purchase.bonus > 0) {
+                await em
+                    .createQueryBuilder()
+                    .update(User)
+                    .set({ bonus: () => 'GREATEST("bonus" - :amt, 0)' })
+                    .setParameter('amt', purchase.bonus)
+                    .where('id = :id', { id: purchase.userId })
+                    .execute();
+            }
+
+            purchase.status = 'rejected';
+            purchase.reviewedAt = new Date();
+            purchase.reviewNote = note;
+            const saved = await em.save(purchase);
+
+            if (!alreadyRejected) {
+                notifyTelegramId = purchase.user?.telegramId;
+                const productTitle = purchase.product?.title ?? 'mahsulot';
+                notifyText =
+                    `❌ "${productTitle}" uchun xaridingiz rad etildi.\n` +
+                    `Bonus hisobingizga qo'shilmadi.`;
+                if (note) notifyText += `\n📝 Sabab: ${note}`;
+            }
+            return saved;
         });
-        if (!purchase) throw new NotFoundException('Yozuv topilmadi');
 
-        const wasApproved = purchase.status === 'approved';
-        const alreadyRejected = purchase.status === 'rejected';
-
-        let user = purchase.user;
-        if (wasApproved && purchase.bonus > 0) {
-            // Bonus 0 dan past tushmasin (foydalanuvchi allaqachon sarflagan bo'lishi mumkin)
-            await this.userRepo
-                .createQueryBuilder()
-                .update(User)
-                .set({ bonus: () => `GREATEST("bonus" - ${purchase.bonus}, 0)` })
-                .where('id = :id', { id: purchase.userId })
-                .execute();
-            user = await this.userRepo.findOne({ where: { id: purchase.userId } }) ?? user;
-        }
-
-        const updated = await this.setStatus(id, 'rejected', note);
-
-        if (!alreadyRejected) {
-            const productTitle = purchase.product?.title ?? 'mahsulot';
-            let text =
-                `❌ "${productTitle}" uchun xaridingiz rad etildi.\n` +
-                `Bonus hisobingizga qo'shilmadi.`;
-            if (note) text += `\n📝 Sabab: ${note}`;
-            await this.notifyUser(user?.telegramId, text);
-        }
+        await this.notifyUser(notifyTelegramId, notifyText);
         return updated;
     }
 }

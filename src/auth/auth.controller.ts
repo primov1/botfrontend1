@@ -98,7 +98,15 @@ export class AuthController {
             maxAge: 365 * 24 * 60 * 60 * 1000,
             path: '/',
         });
-        const back = req.headers.referer || '/';
+        // Faqat o'z serverimizga qaytamiz (open redirect oldini olish)
+        const referer = req.headers.referer || '';
+        let back = '/';
+        try {
+            const url = new URL(referer);
+            if (url.origin === `${req.protocol}://${req.headers.host}`) {
+                back = url.pathname + url.search;
+            }
+        } catch { /* noto'g'ri URL — '/' ga qaytamiz */ }
         return res.redirect(back);
     }
 }
