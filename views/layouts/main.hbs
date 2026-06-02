@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
+    <!-- Mobil overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
     <div class="app">
       {{> sidebar}}
       <main class="main">
@@ -18,5 +21,17 @@
       </main>
     </div>
     <script src="/js/app.js" defer></script>
+    <script>
+      function openSidebar() {
+        document.querySelector('.sidebar').classList.add('sidebar--open');
+        document.getElementById('sidebarOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeSidebar() {
+        document.querySelector('.sidebar').classList.remove('sidebar--open');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    </script>
   </body>
 </html>
