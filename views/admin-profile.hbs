@@ -1,29 +1,29 @@
 <div class="page page-narrow">
   <div class="page-header">
     <div>
-      <h2 class="page-title">Admin profil</h2>
-      <p class="page-sub">Shaxsiy ma'lumotlar va kirish ma'lumotlarini boshqarish</p>
+      <h2 class="page-title">{{t 'ap_title'}}</h2>
+      <p class="page-sub">{{t 'ap_sub'}}</p>
     </div>
   </div>
 
   {{! === Xabarnomalar === }}
-  {{#if (eq query.name_ok "1")}}<div class="alert alert-success">✅ Ism yangilandi.</div>{{/if}}
-  {{#if (eq query.cred_ok "1")}}<div class="alert alert-success">✅ Login va parol muvaffaqiyatli yangilandi.</div>{{/if}}
-  {{#if (eq query.cred_error "wrong_current")}}<div class="alert alert-error">❌ Joriy parol noto'g'ri.</div>{{/if}}
-  {{#if (eq query.cred_error "login_short")}}<div class="alert alert-error">❌ Login kamida 3 ta belgi bo'lishi kerak.</div>{{/if}}
-  {{#if (eq query.cred_error "phone_required")}}<div class="alert alert-error">❌ Telefon raqamni kiriting.</div>{{/if}}
-  {{#if (eq query.cred_error "login_taken")}}<div class="alert alert-error">❌ Bu login allaqachon band.</div>{{/if}}
-  {{#if (eq query.cred_error "unknown")}}<div class="alert alert-error">❌ Saqlashda xatolik yuz berdi.</div>{{/if}}
-  {{#if (eq query.cred_error "pass_short")}}<div class="alert alert-error">❌ Yangi parol kamida 6 ta belgi bo'lishi kerak.</div>{{/if}}
-  {{#if (eq query.cred_error "pass_mismatch")}}<div class="alert alert-error">❌ Yangi parollar mos kelmadi.</div>{{/if}}
-  {{#if (eq query.avatar_ok "1")}}<div class="alert alert-success">✅ Profil rasmi yangilandi.</div>{{/if}}
-  {{#if (eq query.avatar_removed "1")}}<div class="alert alert-success">✅ Rasm o'chirildi.</div>{{/if}}
-  {{#if (eq query.avatar_error "invalid_file")}}<div class="alert alert-error">❌ Faqat JPG, PNG yoki WEBP (max 5MB).</div>{{/if}}
-  {{#if (eq query.avatar_error "processing")}}<div class="alert alert-error">❌ Rasmni yuklab bo'lmadi. Qayta urinib ko'ring.</div>{{/if}}
+  {{#if (eq query.name_ok "1")}}<div class="alert alert-success">{{t 'ap_name_ok'}}</div>{{/if}}
+  {{#if (eq query.cred_ok "1")}}<div class="alert alert-success">{{t 'ap_cred_ok'}}</div>{{/if}}
+  {{#if (eq query.cred_error "wrong_current")}}<div class="alert alert-error">{{t 'ap_wrong_current'}}</div>{{/if}}
+  {{#if (eq query.cred_error "login_short")}}<div class="alert alert-error">{{t 'ap_login_short'}}</div>{{/if}}
+  {{#if (eq query.cred_error "phone_required")}}<div class="alert alert-error">{{t 'ap_phone_required'}}</div>{{/if}}
+  {{#if (eq query.cred_error "login_taken")}}<div class="alert alert-error">{{t 'ap_login_taken'}}</div>{{/if}}
+  {{#if (eq query.cred_error "unknown")}}<div class="alert alert-error">{{t 'ap_unknown'}}</div>{{/if}}
+  {{#if (eq query.cred_error "pass_short")}}<div class="alert alert-error">{{t 'ap_pass_short'}}</div>{{/if}}
+  {{#if (eq query.cred_error "pass_mismatch")}}<div class="alert alert-error">{{t 'ap_pass_mismatch'}}</div>{{/if}}
+  {{#if (eq query.avatar_ok "1")}}<div class="alert alert-success">{{t 'ap_avatar_ok'}}</div>{{/if}}
+  {{#if (eq query.avatar_removed "1")}}<div class="alert alert-success">{{t 'ap_avatar_removed'}}</div>{{/if}}
+  {{#if (eq query.avatar_error "invalid_file")}}<div class="alert alert-error">{{t 'ap_avatar_invalid'}}</div>{{/if}}
+  {{#if (eq query.avatar_error "processing")}}<div class="alert alert-error">{{t 'ap_avatar_processing'}}</div>{{/if}}
 
   {{! === Avatar === }}
   <div class="card" style="margin-bottom:16px">
-    <div class="card-header"><h3 class="card-title">🖼 Profil rasmi</h3></div>
+    <div class="card-header"><h3 class="card-title">{{t 'ap_avatar_title'}}</h3></div>
     <div class="form" style="flex-direction:row;align-items:center;gap:24px;flex-wrap:wrap">
       <div>
         {{#if profile.avatar}}
@@ -37,49 +37,49 @@
       </div>
       <div style="flex:1;display:flex;flex-direction:column;gap:8px">
         <div style="font-weight:600">{{profile.name}}</div>
-        <div style="font-size:13px;color:var(--muted)">Login: <code>{{profile.login}}</code></div>
+        <div style="font-size:13px;color:var(--muted)">{{t 'login_label'}}: <code>{{profile.login}}</code></div>
         <form method="POST" action="/admin/profile/avatar" enctype="multipart/form-data"
               style="display:flex;gap:8px;flex-wrap:wrap">
           <input class="input" type="file" name="avatar" accept="image/jpeg,image/png,image/webp"
                  required style="flex:1;min-width:180px">
-          <button class="btn btn-primary" type="submit">📤 Yuklash</button>
+          <button class="btn btn-primary" type="submit">{{t 'ap_upload'}}</button>
         </form>
         {{#if profile.avatar}}
         <form method="POST" action="/admin/profile/avatar/remove"
-              data-confirm="Rasmni o'chirishni tasdiqlaysizmi?">
-          <button class="btn btn-ghost btn-sm" type="submit">🗑 Rasmni o'chirish</button>
+              data-confirm="{{t 'ap_remove_avatar_confirm'}}">
+          <button class="btn btn-ghost btn-sm" type="submit">{{t 'ap_remove_image'}}</button>
         </form>
         {{/if}}
-        <span class="field-hint">JPG, PNG yoki WEBP · max 5 MB · 200×200 px ga crop qilinadi</span>
+        <span class="field-hint">{{t 'ap_avatar_hint'}}</span>
       </div>
     </div>
   </div>
 
   {{! === Ism === }}
   <div class="card" style="margin-bottom:16px">
-    <div class="card-header"><h3 class="card-title">👤 Ismni o'zgartirish</h3></div>
+    <div class="card-header"><h3 class="card-title">{{t 'ap_name_title'}}</h3></div>
     <form method="POST" action="/admin/profile/name" class="form">
       <label class="field">
-        <span class="field-label">Yangi ism</span>
+        <span class="field-label">{{t 'ap_new_name'}}</span>
         <input class="input" type="text" name="name" value="{{profile.name}}" required minlength="2"
                style="max-width:320px">
       </label>
-      <div class="form-actions"><button class="btn btn-primary" type="submit">💾 Saqlash</button></div>
+      <div class="form-actions"><button class="btn btn-primary" type="submit">💾 {{t 'save'}}</button></div>
     </form>
   </div>
 
   {{! === Login + Parol — BITTA FORMA === }}
   <div class="card" style="margin-bottom:24px">
-    <div class="card-header"><h3 class="card-title">🔐 Login va parolni o'zgartirish</h3></div>
+    <div class="card-header"><h3 class="card-title">{{t 'ap_cred_title'}}</h3></div>
     <form method="POST" action="/admin/profile/credentials" class="form" id="credForm">
 
       {{! Joriy parol (majburiy tasdiqlash) }}
       <label class="field">
-        <span class="field-label">Joriy parol <span class="req">*</span></span>
+        <span class="field-label">{{t 'ap_current_password'}} <span class="req">*</span></span>
         <div class="pw-wrap">
           <input class="input" type="password" name="currentPassword"
                  id="curPass" required autocomplete="current-password"
-                 placeholder="Hozirgi parolingiz">
+                 placeholder="{{t 'ap_current_password_ph'}}">
           <button type="button" class="pw-eye" onclick="togglePw('curPass',this)">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
@@ -87,23 +87,23 @@
       </label>
 
       <div class="cred-divider">
-        <span>Yangi ma'lumotlar</span>
+        <span>{{t 'ap_new_data'}}</span>
       </div>
 
       {{! Yangi login }}
       <label class="field">
-        <span class="field-label">Yangi login <span class="req">*</span></span>
+        <span class="field-label">{{t 'ap_new_login'}} <span class="req">*</span></span>
         <input class="input" type="text" name="newLogin"
                value="{{profile.login}}"
                required minlength="3"
                autocomplete="username"
                style="max-width:320px"
-               placeholder="Kamida 3 ta belgi">
+               placeholder="{{t 'login_ph_3'}}">
       </label>
 
       {{! Telefon raqam }}
       <label class="field">
-        <span class="field-label">Telefon raqam <span class="req">*</span></span>
+        <span class="field-label">{{t 'phone_label'}} <span class="req">*</span></span>
         <input class="input" type="tel" name="phone"
                value="{{profile.phone}}"
                required
@@ -115,14 +115,14 @@
       {{! Yangi parol (ixtiyoriy — bo'sh qolsa o'zgarmaydi) }}
       <label class="field">
         <span class="field-label">
-          Yangi parol
-          <span class="field-hint" style="font-weight:400;margin-left:4px">(bo'sh qolsa o'zgarmaydi)</span>
+          {{t 'ap_new_password'}}
+          <span class="field-hint" style="font-weight:400;margin-left:4px">{{t 'ap_leave_empty'}}</span>
         </span>
         <div class="pw-wrap" style="max-width:360px">
           <input class="input" type="password" name="newPassword"
                  id="newPass" minlength="6"
                  autocomplete="new-password"
-                 placeholder="Kamida 6 ta belgi"
+                 placeholder="{{t 'password_ph_6'}}"
                  oninput="checkMatch()">
           <button type="button" class="pw-eye" onclick="togglePw('newPass',this)">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -131,12 +131,12 @@
       </label>
 
       <label class="field" id="confirmField" style="display:none">
-        <span class="field-label">Yangi parolni takrorlang <span class="req">*</span></span>
+        <span class="field-label">{{t 'ap_repeat_password'}} <span class="req">*</span></span>
         <div class="pw-wrap" style="max-width:360px">
           <input class="input" type="password" name="confirmPassword"
                  id="confPass"
                  autocomplete="new-password"
-                 placeholder="Qaytadan kiriting"
+                 placeholder="{{t 'ap_repeat_ph'}}"
                  oninput="checkMatch()">
           <button type="button" class="pw-eye" onclick="togglePw('confPass',this)">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -146,7 +146,7 @@
       </label>
 
       <div class="form-actions">
-        <button class="btn btn-primary" type="submit" id="credSubmit">💾 Saqlash</button>
+        <button class="btn btn-primary" type="submit" id="credSubmit">💾 {{t 'save'}}</button>
       </div>
     </form>
   </div>

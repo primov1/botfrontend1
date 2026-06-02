@@ -2,11 +2,11 @@
   <div class="page-header">
     <div>
       <h2 class="page-title">
-        {{#if (eq mode 'edit')}}Mahsulotni tahrirlash{{else}}Mahsulot qo'shish{{/if}}
+        {{#if (eq mode 'edit')}}{{t 'pe_edit_title'}}{{else}}{{t 'pe_new_title'}}{{/if}}
       </h2>
-      <p class="page-sub">Asosiy ma'lumotlar va ijtimoiy tarmoq havolalari</p>
+      <p class="page-sub">{{t 'pe_sub'}}</p>
     </div>
-    <a class="btn btn-ghost" href="/products">← Ro'yxatga qaytish</a>
+    <a class="btn btn-ghost" href="/products">{{t 'back_to_list'}}</a>
   </div>
 
   {{#if error}}<div class="alert alert-error">{{error}}</div>{{/if}}
@@ -16,22 +16,22 @@
 
     {{! === Asosiy ma'lumotlar === }}
     <div class="card" style="margin-bottom:16px">
-      <div class="card-header"><h3 class="card-title">📦 Asosiy ma'lumotlar</h3></div>
+      <div class="card-header"><h3 class="card-title">{{t 'pe_basic'}}</h3></div>
       <div class="form">
 
         <label class="field">
-          <span class="field-label">Nomi <span class="req">*</span></span>
+          <span class="field-label">{{t 'name'}} <span class="req">*</span></span>
           <input class="input" type="text" name="title"
-                 value="{{product.title}}" required placeholder="Mahsulot nomi">
+                 value="{{product.title}}" required placeholder="{{t 'pe_name_ph'}}">
         </label>
 
         <label class="field">
-          <span class="field-label">Bonus miqdori <span class="req">*</span></span>
+          <span class="field-label">{{t 'pe_bonus_amount'}} <span class="req">*</span></span>
           <input class="input" type="number" name="bonus"
                  value="{{product.bonus}}" min="0" step="1" required
-                 placeholder="Xarid tasdiqlanganda beriladigan bonus"
+                 placeholder="{{t 'pe_bonus_ph'}}"
                  style="max-width:200px">
-          <span class="field-hint">Ball — xarid tasdiqlangach foydalanuvchi hisobiga qo'shiladi</span>
+          <span class="field-hint">{{t 'pe_bonus_hint'}}</span>
         </label>
 
       </div>
@@ -40,8 +40,8 @@
     {{! === Havolalar === }}
     <div class="card" style="margin-bottom:16px">
       <div class="card-header">
-        <h3 class="card-title">🔗 Havolalar</h3>
-        <span class="badge badge-muted">Uzum majburiy · Telegram/Instagram ixtiyoriy</span>
+        <h3 class="card-title">{{t 'pe_links'}}</h3>
+        <span class="badge badge-muted">{{t 'pe_links_badge'}}</span>
       </div>
       <div class="form" style="gap:0;padding:0">
 
@@ -51,9 +51,9 @@
             <div class="link-row-left">
               <span class="link-icon uzum-icon">🍇</span>
               <div>
-                <div class="link-row-title">Uzum Market URL <span class="req">*</span></div>
+                <div class="link-row-title">{{t 'pe_uzum'}} <span class="req">*</span></div>
                 <div class="link-row-val" id="val-uzum">
-                  {{#if product.uzum_url}}{{product.uzum_url}}{{else}}Havola qo'shish…{{/if}}
+                  {{#if product.uzum_url}}{{product.uzum_url}}{{else}}{{t 'pe_add_link'}}{{/if}}
                 </div>
               </div>
             </div>
@@ -66,7 +66,7 @@
                    placeholder="https://uzum.uz/uz/product/…"
                    required
                    oninput="previewVal('uzum',this.value,'Uzum Market URL')">
-            <span class="field-hint">Mahsulotning Uzum Market sahifasi havolasi</span>
+            <span class="field-hint">{{t 'pe_uzum_hint'}}</span>
           </div>
         </div>
         <div class="link-divider"></div>
@@ -79,9 +79,9 @@
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="#2AABEE"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-1.97 9.289c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.088 14.49l-2.95-.924c-.642-.204-.655-.642.136-.953l11.57-4.461c.537-.194 1.006.131.718.096z"/></svg>
               </span>
               <div>
-                <div class="link-row-title">Telegram kanal</div>
+                <div class="link-row-title">{{t 'pe_tg'}}</div>
                 <div class="link-row-val" id="val-tg">
-                  {{#if product.telegramChannel}}{{product.telegramChannel}}{{else}}Havola qo'shish…{{/if}}
+                  {{#if product.telegramChannel}}{{product.telegramChannel}}{{else}}{{t 'pe_add_link'}}{{/if}}
                 </div>
               </div>
             </div>
@@ -98,7 +98,7 @@
                    value="{{product.telegramChannel}}"
                    placeholder="https://t.me/kanalim"
                    oninput="previewVal('tg',this.value,'Telegram kanal')">
-            <span class="field-hint">Masalan: https://t.me/uzum_official</span>
+            <span class="field-hint">{{t 'pe_tg_hint'}}</span>
           </div>
         </div>
         <div class="link-divider"></div>
@@ -111,9 +111,9 @@
                 <svg viewBox="0 0 24 24" width="18" height="18"><defs><linearGradient id="igG" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FFDC80"/><stop offset="40%" stop-color="#F77737"/><stop offset="70%" stop-color="#C13584"/><stop offset="100%" stop-color="#833AB4"/></linearGradient></defs><path fill="url(#igG)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
               </span>
               <div>
-                <div class="link-row-title">Instagram sahifasi</div>
+                <div class="link-row-title">{{t 'pe_ig'}}</div>
                 <div class="link-row-val" id="val-ig">
-                  {{#if product.instagram}}{{product.instagram}}{{else}}Havola qo'shish…{{/if}}
+                  {{#if product.instagram}}{{product.instagram}}{{else}}{{t 'pe_add_link'}}{{/if}}
                 </div>
               </div>
             </div>
@@ -130,7 +130,7 @@
                    value="{{product.instagram}}"
                    placeholder="https://instagram.com/sahifa"
                    oninput="previewVal('ig',this.value,'Instagram sahifasi')">
-            <span class="field-hint">Masalan: https://instagram.com/uzummarket</span>
+            <span class="field-hint">{{t 'pe_ig_hint'}}</span>
           </div>
         </div>
 
@@ -139,20 +139,20 @@
 
     {{! === Rasm === }}
     <div class="card" style="margin-bottom:16px">
-      <div class="card-header"><h3 class="card-title">🖼 Rasm</h3></div>
+      <div class="card-header"><h3 class="card-title">{{t 'pe_image'}}</h3></div>
       <div class="form">
         <label class="field">
-          <span class="field-label">Rasm <span class="field-hint" style="font-weight:400">(ixtiyoriy)</span></span>
+          <span class="field-label">{{t 'image'}} <span class="field-hint" style="font-weight:400">{{t 'pe_optional'}}</span></span>
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
             <input type="file" id="imgFile" accept="image/jpeg,image/png,image/webp" style="display:none">
             <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('imgFile').click()">
-              📁 Rasm yuklash
+              {{t 'upload_image'}}
             </button>
             <span id="imgUploadStatus" style="font-size:13px;color:var(--muted)"></span>
           </div>
           <input class="input" type="url" name="image" id="imageUrlInput"
                  value="{{product.image}}"
-                 placeholder="ImgBB dan yuklang yoki URL yozing"
+                 placeholder="{{t 'image_url_ph'}}"
                  oninput="updatePreview(this.value)">
         </label>
         <div id="imgPreviewWrap" style="{{#unless product.image}}display:none{{/unless}}">
@@ -165,14 +165,13 @@
 
     {{! === Majburiy obuna === }}
     <div class="card" style="margin-bottom:24px">
-      <div class="card-header"><h3 class="card-title">⚙️ Sozlamalar</h3></div>
+      <div class="card-header"><h3 class="card-title">{{t 'pe_settings'}}</h3></div>
       <div class="form">
         <div class="toggle-row">
           <div>
-            <span class="field-label">Majburiy obuna</span>
+            <span class="field-label">{{t 'pe_require_channel'}}</span>
             <p class="field-hint" style="margin:3px 0 0">
-              Yoqilsa — foydalanuvchi Telegram kanalga obuna bo'lmasa,
-              chek yuborishda ogohlantirish ko'rsatiladi
+              {{t 'pe_require_channel_hint'}}
             </p>
           </div>
           <label class="toggle-switch">
@@ -185,9 +184,9 @@
     </div>
 
     <div class="form-actions" style="padding:0 0 32px">
-      <a class="btn btn-ghost" href="/products">Bekor qilish</a>
+      <a class="btn btn-ghost" href="/products">{{t 'cancel'}}</a>
       <button class="btn btn-primary" type="submit">
-        {{#if (eq mode 'edit')}}💾 Saqlash{{else}}➕ Qo'shish{{/if}}
+        {{#if (eq mode 'edit')}}💾 {{t 'save'}}{{else}}➕ {{t 'add'}}{{/if}}
       </button>
     </div>
   </form>
