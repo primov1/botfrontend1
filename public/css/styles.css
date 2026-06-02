@@ -1,3 +1,5 @@
+
+
 :root {
   --bg: #f5f6fa;
   --surface: #ffffff;
@@ -158,6 +160,12 @@ code {
   z-index: 5;
 }
 
+.topbar-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 .topbar-title {
   margin: 0;
   font-size: 17px;
@@ -207,12 +215,6 @@ code {
   color: #fff;
 }
 
-.topbar-divider {
-  width: 1px;
-  height: 22px;
-  background: var(--border);
-  margin: 0 6px;
-}
 
 /* ---- Admin card ---- */
 .topbar-admin {
