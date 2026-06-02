@@ -1,17 +1,15 @@
 <header class="topbar">
   <h1 class="topbar-title">{{title}}</h1>
 
-  {{! Til almashtirgich — markazda }}
-  <div class="topbar-center">
+  <div class="topbar-actions">
+    {{! Til almashtirgich }}
     <div class="lang-pill-group">
       <a href="/lang/uz" class="lang-pill {{#if (eq lang 'uz')}}lang-pill--active{{/if}}" title="O'zbekcha">UZ</a>
       <a href="/lang/ru" class="lang-pill {{#if (eq lang 'ru')}}lang-pill--active{{/if}}" title="Русский">RUS</a>
       <a href="/lang/en" class="lang-pill {{#if (eq lang 'en')}}lang-pill--active{{/if}}" title="English">ENG</a>
     </div>
-  </div>
 
-  {{! Admin profil — o'ngda }}
-  <div class="topbar-actions">
+    {{! Admin profil }}
     <a class="topbar-admin" href="/admin/profile">
       <span class="topbar-avatar">
         {{#if adminProfile.avatar}}

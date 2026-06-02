@@ -160,16 +160,16 @@ code {
   z-index: 5;
 }
 
-.topbar-center {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
 .topbar-title {
   margin: 0;
   font-size: 17px;
   font-weight: 600;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 /* ---- Til almashtirgich ---- */
@@ -215,6 +215,13 @@ code {
   color: #fff;
 }
 
+
+/* til va admin orasidagi chiziq */
+.topbar-actions .lang-pill-group {
+  border-right: 1px solid var(--border);
+  padding-right: 12px;
+  margin-right: 2px;
+}
 
 /* ---- Admin card ---- */
 .topbar-admin {
