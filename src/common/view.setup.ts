@@ -35,6 +35,7 @@ export function setupView(app: NestExpressApplication, root: string): void {
         });
     });
     hbs.registerHelper('inc', (value: number) => Number(value) + 1);
+    hbs.registerHelper('dec', (value: number) => Number(value) - 1);
 
     // Tarjima: {{t 'key'}} — joriy til res.locals.lang dan olinadi
     hbs.registerHelper('t', function (this: unknown, key: string, options: any) {
