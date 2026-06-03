@@ -9,6 +9,7 @@ import {
     PURCHASE_STATUSES,
 } from '../common/entities/purchase.entity';
 import { User } from '../common/entities/user.entity';
+import { Product } from '../common/entities/product.entity';
 
 export type StatusFilter = PurchaseStatus | 'all';
 
@@ -132,19 +133,17 @@ export class ConfirmationsService {
         let notifyText = '';
 
         const updated = await this.dataSource.transaction(async (em) => {
+            // Lock — relations'siz (FOR UPDATE + LEFT JOIN Postgres'da xato beradi)
             const purchase = await em.findOne(Purchase, {
                 where: { id },
-                relations: ['product', 'user'],
                 lock: { mode: 'pessimistic_write' },
             });
             if (!purchase) throw new NotFoundException('Yozuv topilmadi');
 
             const alreadyApproved = purchase.status === 'approved';
 
-            let updatedBonus = purchase.user?.bonus ?? 0;
             if (!alreadyApproved && purchase.bonus > 0) {
                 await em.increment(User, { id: purchase.userId }, 'bonus', purchase.bonus);
-                updatedBonus = (purchase.user?.bonus ?? 0) + purchase.bonus;
             }
 
             purchase.status = 'approved';
@@ -152,11 +151,18 @@ export class ConfirmationsService {
             const saved = await em.save(purchase);
 
             if (!alreadyApproved) {
-                notifyTelegramId = purchase.user?.telegramId;
+                // Xabar uchun user/product'ni alohida (lock'siz) olamiz
+                const [user, product] = await Promise.all([
+                    em.findOne(User, { where: { id: purchase.userId } }),
+                    purchase.productId
+                        ? em.findOne(Product, { where: { id: purchase.productId } })
+                        : Promise.resolve(null),
+                ]);
+                notifyTelegramId = user?.telegramId;
                 notifyText =
-                    `✅ Tabriklaymiz! "${purchase.product?.title ?? 'mahsulot'}" uchun xaridingiz tasdiqlandi.\n` +
+                    `✅ Tabriklaymiz! "${product?.title ?? 'mahsulot'}" uchun xaridingiz tasdiqlandi.\n` +
                     `🎉 +${purchase.bonus} bonus hisobingizga qo'shildi.\n` +
-                    `💰 Joriy bonusingiz: ${updatedBonus}`;
+                    `💰 Joriy bonusingiz: ${user?.bonus ?? 0}`;
             }
             return saved;
         });
@@ -171,9 +177,9 @@ export class ConfirmationsService {
 
         // Bonus yechish + status o'zgartirish — tranzaksiyada (atomik)
         const updated = await this.dataSource.transaction(async (em) => {
+            // Lock — relations'siz (FOR UPDATE + LEFT JOIN Postgres'da xato beradi)
             const purchase = await em.findOne(Purchase, {
                 where: { id },
-                relations: ['product', 'user'],
                 lock: { mode: 'pessimistic_write' },
             });
             if (!purchase) throw new NotFoundException('Yozuv topilmadi');
@@ -197,10 +203,15 @@ export class ConfirmationsService {
             const saved = await em.save(purchase);
 
             if (!alreadyRejected) {
-                notifyTelegramId = purchase.user?.telegramId;
-                const productTitle = purchase.product?.title ?? 'mahsulot';
+                const [user, product] = await Promise.all([
+                    em.findOne(User, { where: { id: purchase.userId } }),
+                    purchase.productId
+                        ? em.findOne(Product, { where: { id: purchase.productId } })
+                        : Promise.resolve(null),
+                ]);
+                notifyTelegramId = user?.telegramId;
                 notifyText =
-                    `❌ "${productTitle}" uchun xaridingiz rad etildi.\n` +
+                    `❌ "${product?.title ?? 'mahsulot'}" uchun xaridingiz rad etildi.\n` +
                     `Bonus hisobingizga qo'shilmadi.`;
                 if (note) notifyText += `\n📝 Sabab: ${note}`;
             }
