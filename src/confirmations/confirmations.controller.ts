@@ -18,6 +18,12 @@ import { AdminAuthGuard } from '../common/auth.guard';
 export class ConfirmationsController {
     constructor(private readonly confirmationsService: ConfirmationsService) {}
 
+    /** Tepa qo'ng'iroq uchun — kutilayotgan tasdiqlar soni (JSON, polling). */
+    @Get('count')
+    async count() {
+        return { pending: await this.confirmationsService.pendingCount() };
+    }
+
     @Get()
     async list(
         @Query('status') status: string,

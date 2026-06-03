@@ -43,6 +43,36 @@
         if (e.key === 'Escape') closeLightbox();
       });
 
+      // Tasdiq kutilmoqda — har 20s avtomatik yangilanadi (sahifa qayta yuklanmaydi)
+      (function () {
+        var bell = document.getElementById('topbarBell');
+        var badge = document.getElementById('bellBadge');
+        if (!bell || !badge) return;
+        var last = parseInt(badge.textContent || '0', 10) || 0;
+        async function check() {
+          try {
+            var r = await fetch('/confirmations/count', { headers: { 'Accept': 'application/json' } });
+            if (!r.ok) return;
+            var d = await r.json();
+            var n = d.pending || 0;
+            if (n > 0) {
+              badge.textContent = n;
+              badge.style.display = '';
+              bell.classList.add('has-pending');
+            } else {
+              badge.style.display = 'none';
+              bell.classList.remove('has-pending');
+            }
+            // Yangi tasdiq kelsa — sarlavhada ko'rsatamiz
+            if (n > last) {
+              document.title = '(' + n + ') ' + document.title.replace(/^\(\d+\)\s*/, '');
+            }
+            last = n;
+          } catch (e) { /* jim */ }
+        }
+        setInterval(check, 20000);
+      })();
+
       function openSidebar() {
         document.querySelector('.sidebar').classList.add('sidebar--open');
         document.getElementById('sidebarOverlay').classList.add('active');

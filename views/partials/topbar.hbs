@@ -6,6 +6,16 @@
   <h1 class="topbar-title">{{title}}</h1>
 
   <div class="topbar-actions">
+    {{! Bildirishnoma qo'ng'irog'i — kutilayotgan tasdiqlar }}
+    <a class="topbar-bell {{#if pendingConfirmations}}has-pending{{/if}}" id="topbarBell"
+       href="/confirmations?status=pending" title="Tasdiq kutilmoqda">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <span class="topbar-bell-badge" id="bellBadge" style="{{#unless pendingConfirmations}}display:none{{/unless}}">{{pendingConfirmations}}</span>
+    </a>
+
     {{! Til almashtirgich }}
     <div class="lang-pill-group">
       <a href="/lang/uz" class="lang-pill {{#if (eq lang 'uz')}}lang-pill--active{{/if}}" title="O'zbekcha">UZ</a>
