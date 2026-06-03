@@ -67,6 +67,7 @@ export class ConfirmationsService {
         const items = rows.map((r) => ({
             id: r.id,
             bonus: r.bonus ?? 0,
+            quantity: r.quantity ?? 1,
             status: r.status ?? 'pending',
             reviewSubmitted: !!r.reviewSubmitted,
             proofImage: r.proofImage ?? '',

@@ -994,6 +994,18 @@ code {
   border: 1px solid #bbf7d0;
 }
 
+.qty-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--primary-50);
+  color: var(--primary-600);
+  font-weight: 700;
+  font-size: 13px;
+  border: 1px solid #c7d2fe;
+}
+
 .price-pill {
   display: inline-flex;
   align-items: center;

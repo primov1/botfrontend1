@@ -62,6 +62,7 @@
                 {{else}}
                   <span class="muted">{{t 'product_deleted_label'}}</span>
                 {{/if}}
+                {{#if (gt quantity 1)}}<span class="qty-pill">×{{quantity}} {{t 'qty_label'}}</span>{{/if}}
                 <span class="bonus-pill">+{{formatPrice bonus}} {{t 'bonus_word'}}</span>
               </div>
 
