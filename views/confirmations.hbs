@@ -29,13 +29,13 @@
       <div class="confirm-list">
         {{#each data.items}}
           <div class="confirm-item">
-            <a class="confirm-proof" href="{{#if proofImage}}{{proofImage}}{{else}}#{{/if}}" {{#if proofImage}}target="_blank" rel="noopener"{{/if}}>
+            <div class="confirm-proof" {{#if proofImage}}onclick="openLightbox('{{proofImage}}')" style="cursor:zoom-in"{{/if}}>
               {{#if proofImage}}
                 <img src="{{proofImage}}" alt="proof" onerror="this.src='/img/placeholder.svg';" />
               {{else}}
                 <span class="confirm-proof-empty">{{t 'no_image'}}</span>
               {{/if}}
-            </a>
+            </div>
 
             <div class="confirm-main">
               <div class="confirm-row">

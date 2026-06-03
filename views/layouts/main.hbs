@@ -20,8 +20,29 @@
         </section>
       </main>
     </div>
+    <!-- Rasm to'liq ekran (lightbox) -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+      <span class="lightbox-close" aria-label="Yopish">&times;</span>
+      <img id="lightboxImg" src="" alt="" onclick="event.stopPropagation()">
+    </div>
+
     <script src="/js/app.js" defer></script>
     <script>
+      function openLightbox(src) {
+        if (!src) return;
+        document.getElementById('lightboxImg').src = src;
+        document.getElementById('lightbox').classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('active');
+        document.getElementById('lightboxImg').src = '';
+        document.body.style.overflow = '';
+      }
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeLightbox();
+      });
+
       function openSidebar() {
         document.querySelector('.sidebar').classList.add('sidebar--open');
         document.getElementById('sidebarOverlay').classList.add('active');
