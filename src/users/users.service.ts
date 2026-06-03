@@ -95,10 +95,10 @@ export class UsersService {
     async registrationStats(): Promise<{ day: string; count: number }[]> {
         const rows = await this.userRepo
             .createQueryBuilder('u')
-            .select("TO_CHAR(u.\"createdAt\"::date, 'YYYY-MM-DD')", 'day')
+            .select("TO_CHAR((u.\"createdAt\" AT TIME ZONE 'Asia/Tashkent')::date, 'YYYY-MM-DD')", 'day')
             .addSelect('COUNT(*)', 'count')
             .where("u.\"createdAt\" >= NOW() - INTERVAL '30 days'")
-            .groupBy("TO_CHAR(u.\"createdAt\"::date, 'YYYY-MM-DD')")
+            .groupBy("TO_CHAR((u.\"createdAt\" AT TIME ZONE 'Asia/Tashkent')::date, 'YYYY-MM-DD')")
             .orderBy('day', 'ASC')
             .getRawMany();
         return rows.map(r => ({ day: r.day as string, count: Number(r.count) }));
@@ -162,7 +162,7 @@ export class UsersService {
                 phone: u.phone || '',
                 username: u.username ? `@${u.username}` : '',
                 bonus: u.bonus ?? 0,
-                createdAt: u.createdAt ? new Date(u.createdAt).toLocaleString('uz-UZ') : '',
+                createdAt: u.createdAt ? new Date(u.createdAt).toLocaleString('uz-UZ', { timeZone: 'Asia/Tashkent' }) : '',
             });
         });
 

@@ -137,10 +137,10 @@ export class ProductsService {
                 'p."productId" = pr.id AND p.status = :status AND p."createdAt" >= NOW() - INTERVAL \'30 days\'',
                 { status: 'approved' },
             )
-            .select("TO_CHAR(p.\"createdAt\"::date, 'YYYY-MM-DD')", 'day')
+            .select("TO_CHAR((p.\"createdAt\" AT TIME ZONE 'Asia/Tashkent')::date, 'YYYY-MM-DD')", 'day')
             .addSelect('COUNT(p.id)', 'count')
             .addSelect('SUM(p.bonus)', 'bonusTotal')
-            .groupBy("TO_CHAR(p.\"createdAt\"::date, 'YYYY-MM-DD')")
+            .groupBy("TO_CHAR((p.\"createdAt\" AT TIME ZONE 'Asia/Tashkent')::date, 'YYYY-MM-DD')")
             .orderBy('day', 'ASC')
             .getRawMany();
         return rows.map(r => ({
