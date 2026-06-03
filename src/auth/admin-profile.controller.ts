@@ -9,6 +9,7 @@ import { AdminAuthGuard } from '../common/auth.guard';
 import { AdminsService } from '../admins/admins.service';
 import { AuthService } from './auth.service';
 import { AUTH_COOKIE } from '../common/auth.guard';
+import { UploadImageService } from '../upload/upload-image.service';
 import sharp from 'sharp';
 
 @Controller('admin/profile')
@@ -17,6 +18,7 @@ export class AdminProfileController {
     constructor(
         private readonly adminsService: AdminsService,
         private readonly authService: AuthService,
+        private readonly uploadImage: UploadImageService,
     ) {}
 
     private currentLogin(req: Request): string {
@@ -113,21 +115,9 @@ export class AdminProfileController {
                 .jpeg({ quality: 85 })
                 .toBuffer();
 
-            const apiKey = process.env.IMGBB_API_KEY ?? '';
-            const body = new URLSearchParams();
-            body.append('key', apiKey);
-            body.append('image', resized.toString('base64'));
-
-            const response = await fetch('https://api.imgbb.com/1/upload', {
-                method: 'POST',
-                body,
-            });
-
-            const json = await response.json() as any;
-            if (!json?.success) throw new Error('ImgBB upload failed');
-
-            const imageUrl: string = json.data.display_url;
-            await this.adminsService.setAvatar(this.currentLogin(req), imageUrl);
+            // Tashqi xizmatsiz — bazaga saqlaymiz
+            const id = await this.uploadImage.save(resized, 'image/jpeg');
+            await this.adminsService.setAvatar(this.currentLogin(req), this.uploadImage.buildUrl(req, id));
             return res.redirect('/admin/profile?avatar_ok=1');
         } catch {
             return res.redirect('/admin/profile?avatar_error=processing');

@@ -1,12 +1,16 @@
-import { Controller, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import type { Request } from 'express';
 import { AdminAuthGuard } from '../common/auth.guard';
+import { UploadImageService } from './upload-image.service';
 import sharp from 'sharp';
 
 @Controller('api')
 @UseGuards(AdminAuthGuard)
 export class UploadController {
+    constructor(private readonly images: UploadImageService) {}
+
     @Post('upload-image')
     @UseInterceptors(FileInterceptor('image', {
         storage: memoryStorage(),
@@ -15,7 +19,7 @@ export class UploadController {
             cb(null, ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype));
         },
     }))
-    async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    async uploadImage(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
         if (!file) return { success: false, error: 'Fayl yuklanmadi' };
         try {
             const optimized = await sharp(file.buffer)
@@ -23,22 +27,9 @@ export class UploadController {
                 .jpeg({ quality: 85 })
                 .toBuffer();
 
-            const apiKey = process.env.IMGBB_API_KEY;
-            if (!apiKey) return { success: false, error: 'IMGBB_API_KEY sozlanmagan' };
-
-            const body = new URLSearchParams();
-            body.append('key', apiKey);
-            body.append('image', optimized.toString('base64'));
-
-            const response = await fetch('https://api.imgbb.com/1/upload', {
-                method: 'POST',
-                body,
-                signal: AbortSignal.timeout(15_000),
-            });
-            const json = await response.json() as any;
-            if (!json?.success) throw new Error('ImgBB xatosi');
-
-            return { success: true, url: json.data.display_url as string };
+            // Tashqi xizmatsiz — to'g'ridan bazaga saqlaymiz
+            const id = await this.images.save(optimized, 'image/jpeg');
+            return { success: true, url: this.images.buildUrl(req, id) };
         } catch (err) {
             return { success: false, error: (err as Error).message };
         }
