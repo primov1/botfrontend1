@@ -10,6 +10,7 @@ import { ConfirmationsModule } from './confirmations/confirmations.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { BroadcastModule } from './broadcast/broadcast.module';
 import { UploadModule } from './upload/upload.module';
+import { GiftOrdersModule } from './gift-orders/gift-orders.module';
 import { User } from './common/entities/user.entity';
 import { Product } from './common/entities/product.entity';
 import { Gift } from './common/entities/gift.entity';
@@ -71,6 +72,7 @@ import { AdminsModule } from './admins/admins.module';
         DashboardModule,
         BroadcastModule,
         UploadModule,
+        GiftOrdersModule,
     ],
 })
 export class AppModule {}

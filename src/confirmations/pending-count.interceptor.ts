@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import type { Request, Response } from 'express';
 import { ConfirmationsService } from './confirmations.service';
 import { AdminsService } from '../admins/admins.service';
+import { GiftOrdersService } from '../gift-orders/gift-orders.service';
 import { parseCookies } from '../common/cookie.util';
 import { LANG_COOKIE, normalizeLang } from '../common/i18n';
 
@@ -11,6 +12,7 @@ export class PendingCountInterceptor implements NestInterceptor {
     constructor(
         private readonly confirmationsService: ConfirmationsService,
         private readonly adminsService: AdminsService,
+        private readonly giftOrdersService: GiftOrdersService,
     ) {}
 
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
@@ -26,6 +28,11 @@ export class PendingCountInterceptor implements NestInterceptor {
                     res.locals.pendingConfirmations = await this.confirmationsService.pendingCount();
                 } catch {
                     res.locals.pendingConfirmations = 0;
+                }
+                try {
+                    res.locals.undeliveredGifts = await this.giftOrdersService.undeliveredCount();
+                } catch {
+                    res.locals.undeliveredGifts = 0;
                 }
                 // Joriy admin profili (sidebar/topbar uchun) — guard o'rnatgan req.admin'dan
                 const login = (req as any).admin?.sub as string | undefined;

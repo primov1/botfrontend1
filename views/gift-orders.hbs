@@ -1,0 +1,104 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">{{t 'gift_orders_title'}}</h2>
+      <p class="page-sub">{{t 'gift_orders_sub'}}</p>
+    </div>
+  </div>
+
+  {{#if delivered_ok}}<div class="alert alert-success">{{t 'gift_delivered_ok'}}</div>{{/if}}
+
+  <div class="tabs">
+    <a class="tab {{#if (eq data.filter 'all')}}is-active{{/if}}" href="/gift-orders?filter=all">
+      {{t 'gift_tab_all'}} <span class="tab-count">{{data.counts.all}}</span>
+    </a>
+    <a class="tab {{#if (eq data.filter 'undelivered')}}is-active{{/if}}" href="/gift-orders?filter=undelivered">
+      {{t 'gift_tab_new'}} <span class="tab-count">{{data.counts.undelivered}}</span>
+    </a>
+    <a class="tab {{#if (eq data.filter 'delivered')}}is-active{{/if}}" href="/gift-orders?filter=delivered">
+      {{t 'gift_tab_done'}} <span class="tab-count">{{data.counts.delivered}}</span>
+    </a>
+  </div>
+
+  <div class="card">
+    {{#if data.items.length}}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="num">#</th>
+              <th>{{t 'gift_col_gift'}}</th>
+              <th>{{t 'gift_col_user'}}</th>
+              <th>{{t 'col_phone'}}</th>
+              <th>{{t 'gift_col_price'}}</th>
+              <th>{{t 'date'}}</th>
+              <th>{{t 'gift_col_status'}}</th>
+              <th class="actions">{{t 'actions'}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each data.items}}
+              <tr>
+                <td class="num">{{inc @index}}</td>
+                <td>
+                  {{#if gift}}
+                    <div class="gift-cell">
+                      {{#if gift.image}}<img src="{{gift.image}}" alt="{{gift.title}}" onerror="this.src='/img/placeholder.svg';" style="cursor:zoom-in" onclick="openLightbox('{{gift.image}}')" />{{/if}}
+                      <strong>{{gift.title}}</strong>
+                    </div>
+                  {{else}}<span class="muted">[{{t 'gift_removed'}}]</span>{{/if}}
+                </td>
+                <td>
+                  {{#if user}}
+                    <a href="/users/{{user.id}}" class="muted-link">
+                      {{#if user.firstName}}{{user.firstName}} {{/if}}{{user.lastName}}
+                      {{#unless user.firstName}}{{#unless user.lastName}}{{t 'user_word'}}{{/unless}}{{/unless}}
+                    </a>
+                  {{else}}<span class="muted">—</span>{{/if}}
+                </td>
+                <td>{{#if user.phone}}<code>{{user.phone}}</code>{{else}}<span class="muted">—</span>{{/if}}</td>
+                <td><span class="price-pill">−{{formatPrice price}}</span></td>
+                <td class="muted">{{formatDate createdAt}}</td>
+                <td>
+                  {{#if delivered}}
+                    <span class="status-badge status-approved">✓ {{t 'gift_status_done'}}</span>
+                  {{else}}
+                    <span class="status-badge status-pending">{{t 'gift_status_new'}}</span>
+                  {{/if}}
+                </td>
+                <td class="actions">
+                  {{#if delivered}}
+                    <form method="POST" action="/gift-orders/{{id}}/undeliver?filter={{../data.filter}}" style="display:inline">
+                      <button type="submit" class="btn btn-sm btn-ghost">{{t 'gift_undo'}}</button>
+                    </form>
+                  {{else}}
+                    <form method="POST" action="/gift-orders/{{id}}/deliver?filter={{../data.filter}}" style="display:inline">
+                      <button type="submit" class="btn btn-sm btn-success">✓ {{t 'gift_mark_done'}}</button>
+                    </form>
+                  {{/if}}
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+
+      {{#if (ne data.totalPages 1)}}
+        <div class="pagination">
+          <span class="pagination-info">{{t 'total'}}: <b>{{data.total}}</b></span>
+          <div class="pagination-controls">
+            <a class="page-link {{#unless data.hasPrev}}is-disabled{{/unless}}"
+               href="?filter={{data.filter}}&page={{data.prevPage}}">←</a>
+            <span class="page-link is-current">{{data.page}} / {{data.totalPages}}</span>
+            <a class="page-link {{#unless data.hasNext}}is-disabled{{/unless}}"
+               href="?filter={{data.filter}}&page={{data.nextPage}}">→</a>
+          </div>
+        </div>
+      {{/if}}
+    {{else}}
+      <div class="empty">
+        <div class="empty-title">{{t 'gift_orders_empty'}}</div>
+      </div>
+    {{/if}}
+  </div>
+</div>
