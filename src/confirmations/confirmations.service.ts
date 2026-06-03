@@ -109,6 +109,13 @@ export class ConfirmationsService {
         };
     }
 
+    /** Yozuvni o'chirish (tarixdan; bonus o'zgartirilmaydi). */
+    async delete(id: number): Promise<void> {
+        const purchase = await this.purchaseRepo.findOne({ where: { id } });
+        if (!purchase) throw new NotFoundException('Yozuv topilmadi');
+        await this.purchaseRepo.remove(purchase);
+    }
+
     private async setStatus(id: number, status: PurchaseStatus, reviewNote = '') {
         const purchase = await this.purchaseRepo.findOne({ where: { id } });
         if (!purchase) throw new NotFoundException('Yozuv topilmadi');

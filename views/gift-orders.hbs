@@ -6,17 +6,22 @@
     </div>
   </div>
 
-  {{#if delivered_ok}}<div class="alert alert-success">{{t 'gift_delivered_ok'}}</div>{{/if}}
+  {{#if (eq ok 'approved')}}<div class="alert alert-success">{{t 'gift_approved_ok'}}</div>{{/if}}
+  {{#if (eq ok 'rejected')}}<div class="alert alert-warning">{{t 'gift_rejected_ok'}}</div>{{/if}}
+  {{#if (eq ok 'delivered')}}<div class="alert alert-success">{{t 'gift_delivered_ok'}}</div>{{/if}}
 
   <div class="tabs">
+    <a class="tab {{#if (eq data.filter 'pending')}}is-active{{/if}}" href="/gift-orders?filter=pending">
+      {{t 'gift_tab_new'}} <span class="tab-count">{{data.counts.pending}}</span>
+    </a>
+    <a class="tab {{#if (eq data.filter 'approved')}}is-active{{/if}}" href="/gift-orders?filter=approved">
+      {{t 'tab_approved'}} <span class="tab-count">{{data.counts.approved}}</span>
+    </a>
+    <a class="tab {{#if (eq data.filter 'rejected')}}is-active{{/if}}" href="/gift-orders?filter=rejected">
+      {{t 'tab_rejected'}} <span class="tab-count">{{data.counts.rejected}}</span>
+    </a>
     <a class="tab {{#if (eq data.filter 'all')}}is-active{{/if}}" href="/gift-orders?filter=all">
       {{t 'gift_tab_all'}} <span class="tab-count">{{data.counts.all}}</span>
-    </a>
-    <a class="tab {{#if (eq data.filter 'undelivered')}}is-active{{/if}}" href="/gift-orders?filter=undelivered">
-      {{t 'gift_tab_new'}} <span class="tab-count">{{data.counts.undelivered}}</span>
-    </a>
-    <a class="tab {{#if (eq data.filter 'delivered')}}is-active{{/if}}" href="/gift-orders?filter=delivered">
-      {{t 'gift_tab_done'}} <span class="tab-count">{{data.counts.delivered}}</span>
     </a>
   </div>
 
@@ -50,30 +55,40 @@
                 </td>
                 <td>
                   {{#if user}}
-                    <a href="/users/{{user.id}}" class="muted-link">
-                      {{#if user.firstName}}{{user.firstName}} {{/if}}{{user.lastName}}
-                      {{#unless user.firstName}}{{#unless user.lastName}}{{t 'user_word'}}{{/unless}}{{/unless}}
-                    </a>
+                    <a href="/users/{{user.id}}" class="muted-link">{{user.firstName}} {{user.lastName}}</a>
                   {{else}}<span class="muted">—</span>{{/if}}
                 </td>
                 <td>{{#if user.phone}}<code>{{user.phone}}</code>{{else}}<span class="muted">—</span>{{/if}}</td>
                 <td><span class="price-pill">−{{formatPrice price}}</span></td>
                 <td class="muted">{{formatDate createdAt}}</td>
                 <td>
-                  {{#if delivered}}
-                    <span class="status-badge status-approved">✓ {{t 'gift_status_done'}}</span>
-                  {{else}}
-                    <span class="status-badge status-pending">{{t 'gift_status_new'}}</span>
+                  {{#if (eq status 'pending')}}<span class="status-badge status-pending">{{t 'gift_status_new'}}</span>{{/if}}
+                  {{#if (eq status 'approved')}}
+                    <span class="status-badge status-approved">{{t 'tab_approved'}}</span>
+                    {{#if delivered}}<span class="status-badge status-approved">✓ {{t 'gift_status_done'}}</span>{{/if}}
                   {{/if}}
+                  {{#if (eq status 'rejected')}}<span class="status-badge status-rejected">{{t 'tab_rejected'}}</span>{{/if}}
                 </td>
                 <td class="actions">
-                  {{#if delivered}}
-                    <form method="POST" action="/gift-orders/{{id}}/undeliver?filter={{../data.filter}}" style="display:inline">
-                      <button type="submit" class="btn btn-sm btn-ghost">{{t 'gift_undo'}}</button>
+                  {{#if (eq status 'pending')}}
+                    <form method="POST" action="/gift-orders/{{id}}/approve?filter={{../data.filter}}" style="display:inline">
+                      <button type="submit" class="btn btn-sm btn-success">{{t 'approve_btn'}}</button>
+                    </form>
+                    <form method="POST" action="/gift-orders/{{id}}/reject?filter={{../data.filter}}" style="display:inline"
+                          data-confirm="{{t 'reject_confirm'}}">
+                      <button type="submit" class="btn btn-sm btn-danger">{{t 'reject_btn'}}</button>
                     </form>
                   {{else}}
-                    <form method="POST" action="/gift-orders/{{id}}/deliver?filter={{../data.filter}}" style="display:inline">
-                      <button type="submit" class="btn btn-sm btn-success">✓ {{t 'gift_mark_done'}}</button>
+                    {{#if (eq status 'approved')}}
+                      {{#unless delivered}}
+                        <form method="POST" action="/gift-orders/{{id}}/deliver?filter={{../data.filter}}" style="display:inline">
+                          <button type="submit" class="btn btn-sm btn-ghost">✓ {{t 'gift_mark_done'}}</button>
+                        </form>
+                      {{/unless}}
+                    {{/if}}
+                    <form method="POST" action="/gift-orders/{{id}}/delete?filter={{../data.filter}}" style="display:inline"
+                          data-confirm="{{t 'delete_confirm'}}">
+                      <button type="submit" class="btn btn-sm btn-ghost btn-icon-danger" title="{{t 'delete'}}">🗑</button>
                     </form>
                   {{/if}}
                 </td>
@@ -87,18 +102,14 @@
         <div class="pagination">
           <span class="pagination-info">{{t 'total'}}: <b>{{data.total}}</b></span>
           <div class="pagination-controls">
-            <a class="page-link {{#unless data.hasPrev}}is-disabled{{/unless}}"
-               href="?filter={{data.filter}}&page={{data.prevPage}}">←</a>
+            <a class="page-link {{#unless data.hasPrev}}is-disabled{{/unless}}" href="?filter={{data.filter}}&page={{data.prevPage}}">←</a>
             <span class="page-link is-current">{{data.page}} / {{data.totalPages}}</span>
-            <a class="page-link {{#unless data.hasNext}}is-disabled{{/unless}}"
-               href="?filter={{data.filter}}&page={{data.nextPage}}">→</a>
+            <a class="page-link {{#unless data.hasNext}}is-disabled{{/unless}}" href="?filter={{data.filter}}&page={{data.nextPage}}">→</a>
           </div>
         </div>
       {{/if}}
     {{else}}
-      <div class="empty">
-        <div class="empty-title">{{t 'gift_orders_empty'}}</div>
-      </div>
+      <div class="empty"><div class="empty-title">{{t 'gift_orders_empty'}}</div></div>
     {{/if}}
   </div>
 </div>

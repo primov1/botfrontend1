@@ -78,8 +78,8 @@
               {{#if reviewNote}}<div class="confirm-meta muted">{{t 'admin_note'}}: {{reviewNote}}</div>{{/if}}
             </div>
 
-            {{#if (eq status 'pending')}}
-              <div class="confirm-actions">
+            <div class="confirm-actions">
+              {{#if (eq status 'pending')}}
                 <form method="POST" action="/confirmations/{{id}}/approve?status={{../data.status}}">
                   <button type="submit" class="btn btn-sm btn-success btn-block">{{t 'approve_btn'}}</button>
                 </form>
@@ -88,8 +88,12 @@
                   <textarea class="input" name="note" rows="2" placeholder="{{t 'reject_reason_ph'}}" style="resize:vertical;font-size:0.85rem;margin-bottom:6px;"></textarea>
                   <button type="submit" class="btn btn-sm btn-danger btn-block">{{t 'reject_btn'}}</button>
                 </form>
-              </div>
-            {{/if}}
+              {{/if}}
+              <form method="POST" action="/confirmations/{{id}}/delete?status={{../data.status}}"
+                    data-confirm="{{t 'delete_confirm'}}">
+                <button type="submit" class="btn btn-sm btn-ghost btn-block btn-icon-danger">🗑 {{t 'delete'}}</button>
+              </form>
+            </div>
           </div>
         {{/each}}
       </div>

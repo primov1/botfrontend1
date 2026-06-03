@@ -994,6 +994,12 @@ code {
   border: 1px solid #bbf7d0;
 }
 
+.btn-icon-danger:hover {
+  color: var(--danger);
+  border-color: #fecaca;
+  background: var(--danger-50);
+}
+
 .qty-pill {
   display: inline-flex;
   align-items: center;

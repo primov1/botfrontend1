@@ -68,7 +68,17 @@ export class ConfirmationsController {
         return res.redirect(this.backUrl(status, 'rejected'));
     }
 
-    private backUrl(status: string, flag: 'approved' | 'rejected') {
+    @Post(':id/delete')
+    async remove(
+        @Param('id', ParseIntPipe) id: number,
+        @Query('status') status: string,
+        @Res() res: Response,
+    ) {
+        await this.confirmationsService.delete(id);
+        return res.redirect(this.backUrl(status, 'deleted'));
+    }
+
+    private backUrl(status: string, flag: 'approved' | 'rejected' | 'deleted') {
         const valid = ['pending', 'approved', 'rejected', 'all'];
         const st = valid.includes(status) ? status : 'pending';
         return `/confirmations?status=${st}&${flag}=1`;

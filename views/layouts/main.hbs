@@ -69,7 +69,7 @@
         async function check() {
           var [pending, gifts] = await Promise.all([
             fetchCount('/confirmations/count', 'pending'),
-            fetchCount('/gift-orders/count', 'undelivered'),
+            fetchCount('/gift-orders/count', 'pending'),
           ]);
           setBadge(badge, pending, bell);
           setBadge(giftBadge, gifts, null);

@@ -30,9 +30,9 @@ export class PendingCountInterceptor implements NestInterceptor {
                     res.locals.pendingConfirmations = 0;
                 }
                 try {
-                    res.locals.undeliveredGifts = await this.giftOrdersService.undeliveredCount();
+                    res.locals.pendingGifts = await this.giftOrdersService.pendingCount();
                 } catch {
-                    res.locals.undeliveredGifts = 0;
+                    res.locals.pendingGifts = 0;
                 }
                 // Joriy admin profili (sidebar/topbar uchun) — guard o'rnatgan req.admin'dan
                 const login = (req as any).admin?.sub as string | undefined;
