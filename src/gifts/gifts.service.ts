@@ -61,8 +61,11 @@ export class GiftsService {
         if (dto.image !== undefined) payload.image = String(dto.image).trim();
         if (dto.price !== undefined) {
             const num = Number(dto.price);
-            if (Number.isNaN(num) || num < 0) {
-                throw new BadRequestException("price musbat son bo'lishi kerak");
+            if (Number.isNaN(num) || num < 0.1) {
+                throw new BadRequestException("Narx 0.1 dan katta bo'lishi kerak");
+            }
+            if (num > 100) {
+                throw new BadRequestException("Narx eng ko'pi 100 bo'lishi mumkin");
             }
             payload.price = num;
         }
