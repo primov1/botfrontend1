@@ -14,36 +14,22 @@ export class CodesController {
         private readonly productsService: ProductsService,
     ) {}
 
-    /** Sahifa: generatsiya formasi + ro'yxat + filtrlar */
+    /** Sahifa: stiker PDF generatsiya formasi */
     @Get()
     async page(
-        @Query('product_id') productId: string,
-        @Query('is_used') isUsed: string,
-        @Query('expired') expired: string,
-        @Query('page') page: string,
         @Query('generated') generated: string,
         @Query('error') error: string,
         @Res() res: Response,
     ) {
-        const filter = {
-            productId: productId ? Number(productId) : undefined,
-            isUsed: isUsed === '1' ? true : isUsed === '0' ? false : undefined,
-            expired: expired === '1' ? true : expired === '0' ? false : undefined,
-        };
-        const [data, products, stickerText, botUsername] = await Promise.all([
-            this.codesService.list(filter, Number(page) || 1, 50),
+        const [products, stickerText, botUsername] = await Promise.all([
             this.productsService.list(undefined, 1, 1000),
             this.codesService.getStickerText(),
             this.codesService.getBotUsername(),
         ]);
-        // mahsulot nomlarini map qilish
-        const productMap: Record<number, string> = {};
-        for (const p of products.items) productMap[p.id] = p.title;
 
         return res.render('codes', {
             title: 'Kodlar', active: 'codes',
-            data, products: products.items, productMap, stickerText, botUsername,
-            filter: { productId: filter.productId, isUsed, expired },
+            products: products.items, stickerText, botUsername,
             generated: generated ? Number(generated) : 0,
             error,
         });
