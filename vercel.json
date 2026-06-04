@@ -8,7 +8,9 @@
         "includeFiles": [
           "dist/**",
           "views/**",
-          "public/**"
+          "public/**",
+          "node_modules/pdfkit/js/data/**",
+          "node_modules/.pnpm/pdfkit*/**/js/data/**"
         ]
       }
     }

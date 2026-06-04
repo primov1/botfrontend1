@@ -60,12 +60,19 @@ export class CodesService implements OnModuleInit {
      * Batch kod yaratish — bitta INSERT so'rovi. Barcha kodlar unique
      * (DB va batch ichida tekshiriladi, to'qnashsa qayta generatsiya).
      */
-    async generateCodes(productId: number, count: number): Promise<number> {
+    async generateCodes(productId: number, count: number): Promise<{ count: number; codes: string[] }> {
         if (!Number.isInteger(count) || count < 1 || count > MAX_COUNT) {
             throw new BadRequestException(`Miqdor 1 dan ${MAX_COUNT} gacha butun son bo'lishi kerak`);
         }
-        const product = await this.productRepo.findOne({ where: { id: productId } });
-        if (!product) throw new NotFoundException('Mahsulot topilmadi');
+        // Mahsulot ixtiyoriy: tanlangan bo'lsa bonus undan, aks holda 0 (generic)
+        let points = 0;
+        if (productId && productId > 0) {
+            const product = await this.productRepo.findOne({ where: { id: productId } });
+            if (!product) throw new NotFoundException('Mahsulot topilmadi');
+            points = product.bonus;
+        } else {
+            productId = 0;
+        }
 
         const set = new Set<string>();
         while (set.size < count) set.add(this.randomCode());
@@ -87,10 +94,10 @@ export class CodesService implements OnModuleInit {
         expiresAt.setMonth(expiresAt.getMonth() + EXPIRY_MONTHS);
 
         const rows = candidates.map((code) => ({
-            code, productId, points: product.bonus, isUsed: false, expiresAt,
+            code, productId, points, isUsed: false, expiresAt,
         }));
 
-        // Bitta so'rovda batch insert (chunklab — pg parametr limitidan oshmaslik uchun)
+        // Bitta so'rovda batch insert
         await this.codeRepo
             .createQueryBuilder()
             .insert()
@@ -98,7 +105,7 @@ export class CodesService implements OnModuleInit {
             .values(rows)
             .execute();
 
-        return rows.length;
+        return { count: rows.length, codes: candidates };
     }
 
     async list(filter: CodeFilter, page = 1, limit = 50) {
@@ -188,10 +195,35 @@ export class CodesService implements OnModuleInit {
     }
 
     async setStickerText(text: string): Promise<void> {
+        await this.setSetting(this.STICKER_KEY, (text ?? '').slice(0, 200));
+    }
+
+    // ===== Bot nik (QR uchun) =====
+    private readonly BOTNICK_KEY = 'bot_username';
+
+    async getBotUsername(): Promise<string> {
+        const v = await this.getSetting(this.BOTNICK_KEY);
+        return (v || process.env.BOT_USERNAME || '').replace(/^@/, '');
+    }
+
+    async setBotUsername(nick: string): Promise<void> {
+        await this.setSetting(this.BOTNICK_KEY, (nick ?? '').replace(/^@/, '').trim().slice(0, 64));
+    }
+
+    private async getSetting(key: string): Promise<string> {
+        try {
+            const rows = await this.dataSource.query('SELECT "value" FROM "app_settings" WHERE "key" = $1', [key]);
+            return rows[0]?.value || '';
+        } catch {
+            return '';
+        }
+    }
+
+    private async setSetting(key: string, value: string): Promise<void> {
         await this.dataSource.query(
             `INSERT INTO "app_settings" ("key", "value") VALUES ($1, $2)
              ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value"`,
-            [this.STICKER_KEY, (text ?? '').slice(0, 200)],
+            [key, value],
         );
     }
 }

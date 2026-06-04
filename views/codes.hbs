@@ -7,45 +7,46 @@
   </div>
 
   {{#if generated}}<div class="alert alert-success">✅ {{generated}} ta kod yaratildi.</div>{{/if}}
-  {{#if filter.error}}<div class="alert alert-error">❌ {{filter.error}}</div>{{/if}}
+  {{#if error}}<div class="alert alert-error">❌ {{error}}</div>{{/if}}
 
-  {{! === Generatsiya === }}
+  {{! === PDF yaratish (xprinter) === }}
   <div class="card" style="margin-bottom:16px">
-    <div class="card-header"><h3 class="card-title">⚙️ Kod yaratish</h3></div>
-    <form method="POST" action="/admin/codes/generate" class="form"
-          style="flex-direction:row;align-items:flex-end;gap:12px;flex-wrap:wrap"
-          data-confirm="Tanlangan miqdorda kod yaratilsinmi?">
-      <label class="field" style="margin:0;min-width:220px">
-        <span class="field-label">Mahsulot <span class="req">*</span></span>
-        <select class="input" name="product_id" required>
-          <option value="">— tanlang —</option>
-          {{#each products}}
-            <option value="{{id}}">{{title}} (P{{id}})</option>
-          {{/each}}
-        </select>
-      </label>
-      <label class="field" style="margin:0;max-width:160px">
-        <span class="field-label">Nechta? <span class="req">*</span></span>
-        <input class="input" type="number" name="count" min="1" max="10000" step="1"
-               value="100" required placeholder="masalan: 100">
-      </label>
-      <button class="btn btn-primary" type="submit">➕ Yaratish</button>
-    </form>
-    <p class="field-hint" style="padding:6px 4px 0">Kod formati: <code>AXZ78RT</code> (7 talik unique). 1–10000 ta.</p>
-  </div>
-
-  {{! === Stiker matni === }}
-  <div class="card" style="margin-bottom:16px">
-    <div class="card-header"><h3 class="card-title">📝 Stiker matni</h3></div>
-    <form method="POST" action="/admin/codes/sticker-text" class="form"
-          style="flex-direction:row;align-items:flex-end;gap:12px;flex-wrap:wrap">
-      <label class="field" style="margin:0;flex:1;min-width:280px">
-        <span class="field-label">Stikerda chiqadigan matn</span>
+    <div class="card-header"><h3 class="card-title">🖨 Stiker PDF yaratish</h3></div>
+    <form method="POST" action="/admin/print/generate-pdf" class="form">
+      <div class="grid-2">
+        <label class="field">
+          <span class="field-label">Bot nik (@username) <span class="req">*</span></span>
+          <input class="input" type="text" name="bot_username" value="{{botUsername}}" required
+                 placeholder="masalan: imkonplusuzum_bot">
+        </label>
+        <label class="field">
+          <span class="field-label">Nechta? <span class="req">*</span></span>
+          <input class="input" type="number" name="count" min="1" max="10000" step="1"
+                 value="100" required placeholder="masalan: 100">
+        </label>
+      </div>
+      <label class="field">
+        <span class="field-label">Stiker matni</span>
         <input class="input" type="text" name="text" maxlength="200" value="{{stickerText}}"
                placeholder="Sotib oling va bonuslarga ega bo'ling!">
       </label>
-      <button class="btn btn-ghost" type="submit">💾 Saqlash</button>
+      <label class="field">
+        <span class="field-label">Mahsulot <span class="field-hint" style="font-weight:400">(ixtiyoriy — bonus uchun)</span></span>
+        <select class="input" name="product_id" style="max-width:320px">
+          <option value="">— mahsulotsiz (oddiy) —</option>
+          {{#each products}}
+            <option value="{{id}}">{{title}} (+{{bonus}})</option>
+          {{/each}}
+        </select>
+      </label>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">🖨 PDF yaratish va yuklab olish</button>
+      </div>
     </form>
+    <p class="field-hint" style="padding:6px 4px 0">
+      Kod: <code>AXZ78RT</code> (7 talik). Har stiker: 2 QR (kirish + tasdiqlash) + kod.
+      PDF har yorliq alohida sahifa — xprinterda chop eting.
+    </p>
   </div>
 
   {{! === Filtrlar === }}

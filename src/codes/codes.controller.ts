@@ -22,6 +22,7 @@ export class CodesController {
         @Query('expired') expired: string,
         @Query('page') page: string,
         @Query('generated') generated: string,
+        @Query('error') error: string,
         @Res() res: Response,
     ) {
         const filter = {
@@ -29,10 +30,11 @@ export class CodesController {
             isUsed: isUsed === '1' ? true : isUsed === '0' ? false : undefined,
             expired: expired === '1' ? true : expired === '0' ? false : undefined,
         };
-        const [data, products, stickerText] = await Promise.all([
+        const [data, products, stickerText, botUsername] = await Promise.all([
             this.codesService.list(filter, Number(page) || 1, 50),
             this.productsService.list(undefined, 1, 1000),
             this.codesService.getStickerText(),
+            this.codesService.getBotUsername(),
         ]);
         // mahsulot nomlarini map qilish
         const productMap: Record<number, string> = {};
@@ -40,9 +42,10 @@ export class CodesController {
 
         return res.render('codes', {
             title: 'Kodlar', active: 'codes',
-            data, products: products.items, productMap, stickerText,
+            data, products: products.items, productMap, stickerText, botUsername,
             filter: { productId: filter.productId, isUsed, expired },
             generated: generated ? Number(generated) : 0,
+            error,
         });
     }
 
@@ -61,7 +64,7 @@ export class CodesController {
         @Res() res: Response,
     ) {
         try {
-            const n = await this.codesService.generateCodes(Number(productId), Number(count));
+            const { count: n } = await this.codesService.generateCodes(Number(productId), Number(count));
             return res.redirect(`/admin/codes?product_id=${productId}&generated=${n}`);
         } catch (err: any) {
             return res.redirect('/admin/codes?error=' + encodeURIComponent((err?.message || 'Xatolik').slice(0, 120)));
