@@ -1,4 +1,14 @@
 (function () {
+  // Tasdiqlash: data-confirm bo'lgan havolalar (masalan, chiqish)
+  document.addEventListener('click', function (event) {
+    const link = event.target.closest('a[data-confirm]');
+    if (!link) return;
+    const message = link.getAttribute('data-confirm');
+    if (message && !window.confirm(message)) {
+      event.preventDefault();
+    }
+  });
+
   document.addEventListener('submit', function (event) {
     const form = event.target;
     if (!(form instanceof HTMLFormElement)) return;

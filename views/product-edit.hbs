@@ -28,7 +28,7 @@
         <label class="field">
           <span class="field-label">{{t 'pe_bonus_amount'}} <span class="req">*</span></span>
           <input class="input" type="number" name="bonus"
-                 value="{{product.bonus}}" min="0" step="1" required
+                 value="{{product.bonus}}" min="0" max="100" step="1" required
                  placeholder="{{t 'pe_bonus_ph'}}"
                  style="max-width:200px">
           <span class="field-hint">{{t 'pe_bonus_hint'}}</span>

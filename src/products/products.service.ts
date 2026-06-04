@@ -63,7 +63,12 @@ export class ProductsService {
 
         if (dto.bonus !== undefined) {
             const num = Number(dto.bonus);
-            if (Number.isNaN(num) || num < 0) throw new BadRequestException("bonus musbat son bo'lishi kerak");
+            if (Number.isNaN(num) || !Number.isInteger(num) || num < 0) {
+                throw new BadRequestException("Bonus musbat butun son bo'lishi kerak");
+            }
+            if (num > 100) {
+                throw new BadRequestException('Bonus eng ko\'pi 100 bo\'lishi mumkin');
+            }
             payload.bonus = num;
         }
 

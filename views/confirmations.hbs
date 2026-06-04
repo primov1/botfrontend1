@@ -80,7 +80,8 @@
 
             <div class="confirm-actions">
               {{#if (eq status 'pending')}}
-                <form method="POST" action="/confirmations/{{id}}/approve?status={{../data.status}}">
+                <form method="POST" action="/confirmations/{{id}}/approve?status={{../data.status}}"
+                      data-confirm="{{t 'approve_confirm'}}">
                   <button type="submit" class="btn btn-sm btn-success btn-block">{{t 'approve_btn'}}</button>
                 </form>
                 <form method="POST" action="/confirmations/{{id}}/reject?status={{../data.status}}"

@@ -51,3 +51,4 @@ export class GiftPurchase {
     @UpdateDateColumn()
     updatedAt: Date;
 }
+
