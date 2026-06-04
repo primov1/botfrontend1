@@ -5,8 +5,10 @@ import { randomInt } from 'node:crypto';
 import { Code } from '../common/entities/code.entity';
 import { Product } from '../common/entities/product.entity';
 
-const ALPHANUM = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-const ALLOWED_COUNTS = [500, 1000, 1500, 2000];
+// O'qishda chalkashmasligi uchun 0/O/1/I olib tashlandi
+const ALPHANUM = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const CODE_LENGTH = 7;     // 7 talik unique ID (prefiksiz)
+const MAX_COUNT = 10000;   // bir martada maksimal
 const EXPIRY_MONTHS = 12;
 
 export interface CodeFilter {
@@ -47,13 +49,10 @@ export class CodesService implements OnModuleInit {
         }
     }
 
-    private prefixFor(productId: number): string {
-        return `P${productId}`;
-    }
-
-    private randomSuffix(): string {
+    /** 7 talik unique kod (prefiksiz). Masalan: AXZ78RT */
+    private randomCode(): string {
         let s = '';
-        for (let i = 0; i < 5; i++) s += ALPHANUM[randomInt(ALPHANUM.length)];
+        for (let i = 0; i < CODE_LENGTH; i++) s += ALPHANUM[randomInt(ALPHANUM.length)];
         return s;
     }
 
@@ -62,15 +61,14 @@ export class CodesService implements OnModuleInit {
      * (DB va batch ichida tekshiriladi, to'qnashsa qayta generatsiya).
      */
     async generateCodes(productId: number, count: number): Promise<number> {
-        if (!ALLOWED_COUNTS.includes(count)) {
-            throw new BadRequestException(`Miqdor faqat ${ALLOWED_COUNTS.join(', ')} dan biri bo'lishi kerak`);
+        if (!Number.isInteger(count) || count < 1 || count > MAX_COUNT) {
+            throw new BadRequestException(`Miqdor 1 dan ${MAX_COUNT} gacha butun son bo'lishi kerak`);
         }
         const product = await this.productRepo.findOne({ where: { id: productId } });
         if (!product) throw new NotFoundException('Mahsulot topilmadi');
 
-        const prefix = this.prefixFor(productId);
         const set = new Set<string>();
-        while (set.size < count) set.add(`${prefix}-${this.randomSuffix()}`);
+        while (set.size < count) set.add(this.randomCode());
 
         // DB'da mavjudlarini tekshirib, to'qnashganlarini qayta yaratamiz
         let candidates = [...set];
@@ -79,7 +77,7 @@ export class CodesService implements OnModuleInit {
             const taken = new Set(existing.map((e) => e.code));
             const finalSet = new Set(candidates.filter((c) => !taken.has(c)));
             while (finalSet.size < count) {
-                const c = `${prefix}-${this.randomSuffix()}`;
+                const c = this.randomCode();
                 if (!taken.has(c)) finalSet.add(c);
             }
             candidates = [...finalSet];
@@ -172,5 +170,28 @@ export class CodesService implements OnModuleInit {
 
     findById(id: number) {
         return this.codeRepo.findOne({ where: { id } });
+    }
+
+    // ===== Stiker matni (admin kiritadigan) — app_settings'da =====
+    private readonly STICKER_KEY = 'sticker_text';
+    private readonly STICKER_DEFAULT = "Sotib oling va bonuslarga ega bo'ling!";
+
+    async getStickerText(): Promise<string> {
+        try {
+            const rows = await this.dataSource.query(
+                'SELECT "value" FROM "app_settings" WHERE "key" = $1', [this.STICKER_KEY],
+            );
+            return rows[0]?.value || this.STICKER_DEFAULT;
+        } catch {
+            return this.STICKER_DEFAULT;
+        }
+    }
+
+    async setStickerText(text: string): Promise<void> {
+        await this.dataSource.query(
+            `INSERT INTO "app_settings" ("key", "value") VALUES ($1, $2)
+             ON CONFLICT ("key") DO UPDATE SET "value" = EXCLUDED."value"`,
+            [this.STICKER_KEY, (text ?? '').slice(0, 200)],
+        );
     }
 }

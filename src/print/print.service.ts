@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import * as QRCode from 'qrcode';
 import { Code } from '../common/entities/code.entity';
 import { Product } from '../common/entities/product.entity';
+import { CodesService } from '../codes/codes.service';
 
 @Injectable()
 export class PrintService {
@@ -18,6 +19,7 @@ export class PrintService {
         @InjectRepository(Code) private readonly codeRepo: Repository<Code>,
         @InjectRepository(Product) private readonly productRepo: Repository<Product>,
         @InjectBot() private readonly bot: Telegraf,
+        private readonly codesService: CodesService,
     ) {}
 
     /** Sahifalab kodlarni qaytaradi. */
@@ -45,9 +47,9 @@ export class PrintService {
         return (this.cachedUsername = 'imkonplusuzum_bot');
     }
 
-    /** t.me/botusername uchun QR (base64 data URL). Kod URL'da YO'Q. */
-    async generateQrCode(botUsername: string): Promise<string> {
-        return QRCode.toDataURL(`https://t.me/${botUsername}`, { margin: 1, width: 220 });
+    /** Berilgan URL uchun QR (base64 data URL). */
+    async generateQrCode(url: string): Promise<string> {
+        return QRCode.toDataURL(url, { margin: 1, width: 220, errorCorrectionLevel: 'M' });
     }
 
     /** Logo (base64) — public/img/logo.png yoki src/assets/logo.png dan. */
@@ -79,30 +81,43 @@ export class PrintService {
         return `${m}.${date.getFullYear()}`;
     }
 
-    /** Stikerlar HTML (string). */
+    /** Stikerlar HTML (string). Har stikerda 2 QR + 7 talik ID + admin matn. */
     async generateStickerHtml(codes: Code[]): Promise<string> {
         if (!codes.length) return '<p style="padding:20px">Kod yo\'q</p>';
 
-        const productIds = [...new Set(codes.map((c) => c.productId))];
-        const products = await this.productRepo.find({ where: { id: In(productIds) } });
-        const nameMap: Record<number, string> = {};
-        for (const p of products) nameMap[p.id] = p.title;
-
         const username = await this.getBotUsername();
-        const qr = await this.generateQrCode(username);
+        const topText = await this.codesService.getStickerText();
         const logo = this.getLogoDataUrl();
-        const logoHtml = logo
-            ? `<img class="logo" src="${logo}" alt="logo">`
-            : `<div class="logo-ph">LOGO</div>`;
+        const logoHtml = logo ? `<img class="logo" src="${logo}" alt="logo">` : '';
 
-        return codes.map((c) => `
+        // QR-1 — oddiy kirish (barcha stiker uchun bir xil)
+        const qrEntry = await this.generateQrCode(`https://t.me/${username}`);
+
+        const parts: string[] = [];
+        for (const c of codes) {
+            // QR-2 — kod bilan (chek yuklashga to'g'ridan o'tkazadi)
+            const qrConfirm = await this.generateQrCode(`https://t.me/${username}?start=${c.code}`);
+            parts.push(`
         <div class="sticker">
-          ${logoHtml}
-          <div class="pname">${this.esc(nameMap[c.productId] ?? '')}</div>
-          <img class="qr" src="${qr}" alt="QR">
-          <div class="code">${this.esc(c.code)}</div>
-          <div class="expiry">${this.fmtExpiry(c.expiresAt)}</div>
-        </div>`).join('\n');
+          <div class="s-top">
+            ${logoHtml}
+            <div class="s-text">${this.esc(topText)}</div>
+          </div>
+          <div class="qr-row">
+            <div class="qr-col">
+              <img class="qr" src="${qrEntry}" alt="QR1">
+              <div class="qr-label">▶️ Botga kirish</div>
+            </div>
+            <div class="qr-col">
+              <img class="qr" src="${qrConfirm}" alt="QR2">
+              <div class="qr-label">📸 Xaridni tasdiqlash</div>
+            </div>
+          </div>
+          <div class="s-id">ID: <b>${this.esc(c.code)}</b></div>
+          <div class="s-exp">${this.fmtExpiry(c.expiresAt)}</div>
+        </div>`);
+        }
+        return parts.join('\n');
     }
 
     /** To'liq HTML sahifa (chop etishga tayyor). */
@@ -112,36 +127,36 @@ export class PrintService {
 <meta charset="utf-8">
 <title>${this.esc(meta.title)}</title>
 <style>
-  @page { size: 40mm 60mm; margin: 0; }
+  @page { margin: 5mm; }
   * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: #e9ecef; }
   .bar { padding: 10px 14px; background: #1e293b; color: #fff; display: flex; gap: 14px; align-items: center; position: sticky; top: 0; }
   .bar button { padding: 7px 16px; border: 0; border-radius: 6px; background: #6366f1; color: #fff; font-weight: 600; cursor: pointer; }
   .bar .info { font-size: 13px; opacity: .85; }
-  .sheet { display: flex; flex-wrap: wrap; gap: 4mm; padding: 10mm; justify-content: center; }
+  .sheet { display: flex; flex-wrap: wrap; gap: 5mm; padding: 8mm; justify-content: flex-start; }
   .sticker {
-    width: 40mm; height: 60mm;
-    padding: 2.5mm 2mm;
+    width: 75mm;
+    padding: 3mm;
     background: #fff;
-    border: 1px solid #94a3b8;        /* kesish chizig'i */
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: space-between;
-    text-align: center; overflow: hidden;
-    page-break-after: always; break-after: page;
+    border: 1px dashed #94a3b8;        /* kesish chizig'i */
+    text-align: center;
+    page-break-inside: avoid; break-inside: avoid;
   }
-  .sticker:last-child { page-break-after: auto; break-after: auto; }
-  .logo { height: 7mm; max-width: 30mm; object-fit: contain; }
-  .logo-ph { height: 7mm; min-width: 18mm; display: flex; align-items: center; justify-content: center;
-             font-size: 6pt; color: #94a3b8; border: 1px dashed #cbd5e1; border-radius: 2px; }
-  .pname { font-size: 8pt; font-weight: 700; line-height: 1.1; max-height: 10mm; overflow: hidden; }
-  .qr { width: 23mm; height: 23mm; }
-  .code { font-family: 'Courier New', monospace; font-size: 11pt; font-weight: 700; letter-spacing: 1.5px; }
-  .expiry { font-size: 7.5pt; color: #334155; font-weight: 600; }
+  .s-top { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 2mm; }
+  .logo { height: 8mm; max-width: 24mm; object-fit: contain; }
+  .s-text { font-size: 10pt; font-weight: 700; line-height: 1.15; }
+  .qr-row { display: flex; justify-content: space-around; align-items: flex-start; gap: 4mm; }
+  .qr-col { display: flex; flex-direction: column; align-items: center; }
+  .qr { width: 26mm; height: 26mm; }
+  .qr-label { font-size: 7.5pt; font-weight: 600; margin-top: 1mm; color: #1e293b; }
+  .s-id { margin-top: 2.5mm; font-family: 'Courier New', monospace; font-size: 12pt; letter-spacing: 2px; }
+  .s-id b { font-weight: 700; }
+  .s-exp { font-size: 7.5pt; color: #64748b; margin-top: 0.5mm; }
   @media print {
     body { background: #fff; }
     .bar { display: none; }
-    .sheet { padding: 0; gap: 0; }
-    .sticker { border: 1px solid #000; }
+    .sheet { padding: 0; gap: 4mm; }
+    .sticker { border: 1px dashed #999; }
   }
 </style></head>
 <body>

@@ -29,9 +29,10 @@ export class CodesController {
             isUsed: isUsed === '1' ? true : isUsed === '0' ? false : undefined,
             expired: expired === '1' ? true : expired === '0' ? false : undefined,
         };
-        const [data, products] = await Promise.all([
+        const [data, products, stickerText] = await Promise.all([
             this.codesService.list(filter, Number(page) || 1, 50),
             this.productsService.list(undefined, 1, 1000),
+            this.codesService.getStickerText(),
         ]);
         // mahsulot nomlarini map qilish
         const productMap: Record<number, string> = {};
@@ -39,10 +40,17 @@ export class CodesController {
 
         return res.render('codes', {
             title: 'Kodlar', active: 'codes',
-            data, products: products.items, productMap,
+            data, products: products.items, productMap, stickerText,
             filter: { productId: filter.productId, isUsed, expired },
             generated: generated ? Number(generated) : 0,
         });
+    }
+
+    /** Stiker matnini saqlash */
+    @Post('sticker-text')
+    async saveStickerText(@Body('text') text: string, @Res() res: Response) {
+        await this.codesService.setStickerText(text ?? '');
+        return res.redirect('/admin/codes');
     }
 
     /** Kod generatsiya (batch). product_id va count qabul qiladi. */

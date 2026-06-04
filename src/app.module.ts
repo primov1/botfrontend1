@@ -78,6 +78,8 @@ import { AdminsModule } from './admins/admins.module';
         GiftOrdersModule,
         CodesModule,
         PrintModule,
+        CodesModule,
+        PrintModule,
     ],
 })
 export class AppModule {}
