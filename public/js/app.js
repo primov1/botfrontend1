@@ -31,6 +31,28 @@
     }
   });
 
+  // Raqamli inputlar uchun o'zbekcha xato xabarlari
+  document.querySelectorAll('input[type="number"][max], input[type="number"][min]').forEach(function (input) {
+    function validate() {
+      var val = parseFloat(input.value);
+      var min = input.min !== '' ? parseFloat(input.min) : null;
+      var max = input.max !== '' ? parseFloat(input.max) : null;
+      if (input.value === '') {
+        input.setCustomValidity('');
+      } else if (isNaN(val)) {
+        input.setCustomValidity('Iltimos, son kiriting');
+      } else if (min !== null && val < min) {
+        input.setCustomValidity('Qiymat ' + min + ' dan katta bo\'lishi kerak');
+      } else if (max !== null && val > max) {
+        input.setCustomValidity('Qiymat ' + max + ' dan oshmasligi kerak');
+      } else {
+        input.setCustomValidity('');
+      }
+    }
+    input.addEventListener('input', validate);
+    input.addEventListener('change', validate);
+  });
+
   setTimeout(() => {
     document.querySelectorAll('.alert-success, .alert-warning').forEach((el) => {
       el.style.transition = 'opacity 0.4s';
