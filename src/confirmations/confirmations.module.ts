@@ -7,9 +7,10 @@ import { PendingCountInterceptor } from './pending-count.interceptor';
 import { Purchase } from '../common/entities/purchase.entity';
 import { User } from '../common/entities/user.entity';
 import { Product } from '../common/entities/product.entity';
+import { Code } from '../common/entities/code.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Purchase, User, Product])],
+    imports: [TypeOrmModule.forFeature([Purchase, User, Product, Code])],
     controllers: [ConfirmationsController],
     providers: [
         ConfirmationsService,

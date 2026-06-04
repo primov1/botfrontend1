@@ -10,6 +10,7 @@ import {
 } from '../common/entities/purchase.entity';
 import { User } from '../common/entities/user.entity';
 import { Product } from '../common/entities/product.entity';
+import { Code } from '../common/entities/code.entity';
 
 export type StatusFilter = PurchaseStatus | 'all';
 
@@ -22,6 +23,8 @@ export class ConfirmationsService {
         private readonly purchaseRepo: Repository<Purchase>,
         @InjectRepository(User)
         private readonly userRepo: Repository<User>,
+        @InjectRepository(Code)
+        private readonly codeRepo: Repository<Code>,
         @InjectBot() private readonly bot: Telegraf,
         private readonly dataSource: DataSource,
     ) {}
@@ -157,6 +160,21 @@ export class ConfirmationsService {
             purchase.status = 'approved';
             purchase.reviewedAt = new Date();
             const saved = await em.save(purchase);
+
+            // reviewNote dan kod ID larini parse qilib, ishlatilgan deb belgilaymiz
+            if (!alreadyApproved) {
+                const idsMatch = (purchase.reviewNote ?? '').match(/\[ids:([\d,]+)\]/);
+                if (idsMatch) {
+                    const codeIds = idsMatch[1].split(',').map(Number).filter(Boolean);
+                    if (codeIds.length > 0) {
+                        await em.createQueryBuilder()
+                            .update(Code)
+                            .set({ isUsed: true, usedByUserId: purchase.userId, usedAt: () => 'now()' })
+                            .where('id IN (:...ids) AND "isUsed" = false', { ids: codeIds })
+                            .execute();
+                    }
+                }
+            }
 
             if (!alreadyApproved) {
                 // Xabar uchun user/product'ni alohida (lock'siz) olamiz
