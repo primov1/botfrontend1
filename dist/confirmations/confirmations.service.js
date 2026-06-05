@@ -166,17 +166,17 @@ let ConfirmationsService = ConfirmationsService_1 = class ConfirmationsService {
                 }
             }
             if (!alreadyApproved) {
-                const [user, product] = await Promise.all([
-                    em.findOne(user_entity_1.User, { where: { id: purchase.userId } }),
+                const [freshUser, product] = await Promise.all([
+                    em.query('SELECT "telegramId", bonus FROM users WHERE id = $1', [purchase.userId]).then(rows => rows[0] ?? null),
                     purchase.productId
                         ? em.findOne(product_entity_1.Product, { where: { id: purchase.productId } })
                         : Promise.resolve(null),
                 ]);
-                notifyTelegramId = user?.telegramId;
+                notifyTelegramId = freshUser?.telegramId;
                 notifyText =
                     `✅ Tabriklaymiz! "${product?.title ?? 'mahsulot'}" uchun xaridingiz tasdiqlandi.\n` +
                         `🎉 +${purchase.bonus} bonus hisobingizga qo'shildi.\n` +
-                        `💰 Joriy bonusingiz: ${user?.bonus ?? 0}`;
+                        `💰 Joriy bonusingiz: ${freshUser?.bonus ?? 0}`;
             }
             return saved;
         });

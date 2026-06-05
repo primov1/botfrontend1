@@ -176,18 +176,21 @@ export class ConfirmationsService {
             }
 
             if (!alreadyApproved) {
-                // Xabar uchun user/product'ni alohida (lock'siz) olamiz
-                const [user, product] = await Promise.all([
-                    em.findOne(User, { where: { id: purchase.userId } }),
+                const [freshUser, product] = await Promise.all([
+                    // Raw query — entity manager keshini chetlab, yangi balansni olamiz
+                    em.query<{ telegramId: number; bonus: number }[]>(
+                        'SELECT "telegramId", bonus FROM users WHERE id = $1',
+                        [purchase.userId],
+                    ).then(rows => rows[0] ?? null),
                     purchase.productId
                         ? em.findOne(Product, { where: { id: purchase.productId } })
                         : Promise.resolve(null),
                 ]);
-                notifyTelegramId = user?.telegramId;
+                notifyTelegramId = freshUser?.telegramId;
                 notifyText =
                     `✅ Tabriklaymiz! "${product?.title ?? 'mahsulot'}" uchun xaridingiz tasdiqlandi.\n` +
                     `🎉 +${purchase.bonus} bonus hisobingizga qo'shildi.\n` +
-                    `💰 Joriy bonusingiz: ${user?.bonus ?? 0}`;
+                    `💰 Joriy bonusingiz: ${freshUser?.bonus ?? 0}`;
             }
             return saved;
         });
