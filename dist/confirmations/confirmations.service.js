@@ -16,8 +16,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConfirmationsService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
-const nestjs_telegraf_1 = require("nestjs-telegraf");
-const telegraf_1 = require("telegraf");
 const typeorm_2 = require("typeorm");
 const purchase_entity_1 = require("../common/entities/purchase.entity");
 const user_entity_1 = require("../common/entities/user.entity");
@@ -27,14 +25,12 @@ let ConfirmationsService = ConfirmationsService_1 = class ConfirmationsService {
     purchaseRepo;
     userRepo;
     codeRepo;
-    bot;
     dataSource;
     logger = new common_1.Logger(ConfirmationsService_1.name);
-    constructor(purchaseRepo, userRepo, codeRepo, bot, dataSource) {
+    constructor(purchaseRepo, userRepo, codeRepo, dataSource) {
         this.purchaseRepo = purchaseRepo;
         this.userRepo = userRepo;
         this.codeRepo = codeRepo;
-        this.bot = bot;
         this.dataSource = dataSource;
     }
     async counts() {
@@ -128,16 +124,30 @@ let ConfirmationsService = ConfirmationsService_1 = class ConfirmationsService {
     async notifyUser(telegramId, text) {
         if (!telegramId)
             return;
+        const token = process.env.BOT_TOKEN;
+        if (!token) {
+            this.logger.warn('BOT_TOKEN topilmadi — foydalanuvchiga xabar yuborilmadi');
+            return;
+        }
         try {
-            await this.bot.telegram.sendMessage(telegramId, text);
+            const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: Number(telegramId), text }),
+            });
+            if (!res.ok) {
+                const body = await res.text();
+                this.logger.error(`Telegram API xato (${telegramId}): ${body}`);
+            }
         }
         catch (err) {
             this.logger.error(`Telegram xabar yuborilmadi (${telegramId}): ${err.message}`);
         }
     }
     async approve(id) {
-        let notifyTelegramId;
-        let notifyText = '';
+        let notifyUserId;
+        let notifyBonus = 0;
+        let notifyProductTitle = '';
         const updated = await this.dataSource.transaction(async (em) => {
             const purchase = await em.findOne(purchase_entity_1.Purchase, {
                 where: { id },
@@ -164,28 +174,27 @@ let ConfirmationsService = ConfirmationsService_1 = class ConfirmationsService {
                             .execute();
                     }
                 }
-            }
-            if (!alreadyApproved) {
-                const [freshUser, product] = await Promise.all([
-                    em.query('SELECT "telegramId", bonus FROM users WHERE id = $1', [purchase.userId]).then(rows => rows[0] ?? null),
-                    purchase.productId
-                        ? em.findOne(product_entity_1.Product, { where: { id: purchase.productId } })
-                        : Promise.resolve(null),
-                ]);
-                notifyTelegramId = freshUser?.telegramId;
-                notifyText =
-                    `✅ Tabriklaymiz! "${product?.title ?? 'mahsulot'}" uchun xaridingiz tasdiqlandi.\n` +
-                        `🎉 +${purchase.bonus} bonus hisobingizga qo'shildi.\n` +
-                        `💰 Joriy bonusingiz: ${freshUser?.bonus ?? 0}`;
+                const product = purchase.productId
+                    ? await em.findOne(product_entity_1.Product, { where: { id: purchase.productId } })
+                    : null;
+                notifyUserId = purchase.userId;
+                notifyBonus = purchase.bonus;
+                notifyProductTitle = product?.title ?? 'mahsulot';
             }
             return saved;
         });
-        await this.notifyUser(notifyTelegramId, notifyText);
+        if (notifyUserId) {
+            const user = await this.userRepo.findOne({ where: { id: notifyUserId } });
+            const text = `✅ Tabriklaymiz! "${notifyProductTitle}" uchun xaridingiz tasdiqlandi.\n` +
+                `🎉 +${notifyBonus} bonus hisobingizga qo'shildi.\n` +
+                `💰 Joriy bonusingiz: ${user?.bonus ?? 0}`;
+            await this.notifyUser(user?.telegramId, text);
+        }
         return updated;
     }
     async reject(id, note = '') {
-        let notifyTelegramId;
-        let notifyText = '';
+        let notifyUserId;
+        let notifyProductTitle = '';
         const updated = await this.dataSource.transaction(async (em) => {
             const purchase = await em.findOne(purchase_entity_1.Purchase, {
                 where: { id },
@@ -209,22 +218,22 @@ let ConfirmationsService = ConfirmationsService_1 = class ConfirmationsService {
             purchase.reviewNote = note;
             const saved = await em.save(purchase);
             if (!alreadyRejected) {
-                const [user, product] = await Promise.all([
-                    em.findOne(user_entity_1.User, { where: { id: purchase.userId } }),
-                    purchase.productId
-                        ? em.findOne(product_entity_1.Product, { where: { id: purchase.productId } })
-                        : Promise.resolve(null),
-                ]);
-                notifyTelegramId = user?.telegramId;
-                notifyText =
-                    `❌ "${product?.title ?? 'mahsulot'}" uchun xaridingiz rad etildi.\n` +
-                        `Bonus hisobingizga qo'shilmadi.`;
-                if (note)
-                    notifyText += `\n📝 Sabab: ${note}`;
+                const product = purchase.productId
+                    ? await em.findOne(product_entity_1.Product, { where: { id: purchase.productId } })
+                    : null;
+                notifyUserId = purchase.userId;
+                notifyProductTitle = product?.title ?? 'mahsulot';
             }
             return saved;
         });
-        await this.notifyUser(notifyTelegramId, notifyText);
+        if (notifyUserId) {
+            const user = await this.userRepo.findOne({ where: { id: notifyUserId } });
+            let text = `❌ "${notifyProductTitle}" uchun xaridingiz rad etildi.\n` +
+                `Bonus hisobingizga qo'shilmadi.`;
+            if (note)
+                text += `\n📝 Sabab: ${note}`;
+            await this.notifyUser(user?.telegramId, text);
+        }
         return updated;
     }
 };
@@ -234,11 +243,9 @@ exports.ConfirmationsService = ConfirmationsService = ConfirmationsService_1 = _
     __param(0, (0, typeorm_1.InjectRepository)(purchase_entity_1.Purchase)),
     __param(1, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __param(2, (0, typeorm_1.InjectRepository)(code_entity_1.Code)),
-    __param(3, (0, nestjs_telegraf_1.InjectBot)()),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        telegraf_1.Telegraf,
         typeorm_2.DataSource])
 ], ConfirmationsService);
 //# sourceMappingURL=confirmations.service.js.map

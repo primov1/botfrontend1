@@ -1,7 +1,5 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { InjectBot } from 'nestjs-telegraf';
-import { Telegraf } from 'telegraf';
 import { DataSource, Repository } from 'typeorm';
 import {
     Purchase,
@@ -25,7 +23,6 @@ export class ConfirmationsService {
         private readonly userRepo: Repository<User>,
         @InjectRepository(Code)
         private readonly codeRepo: Repository<Code>,
-        @InjectBot() private readonly bot: Telegraf,
         private readonly dataSource: DataSource,
     ) {}
 
@@ -127,23 +124,37 @@ export class ConfirmationsService {
         return this.purchaseRepo.save(purchase);
     }
 
-    private async notifyUser(telegramId: number | undefined, text: string) {
+    private async notifyUser(telegramId: number | string | undefined | null, text: string) {
         if (!telegramId) return;
+        const token = process.env.BOT_TOKEN;
+        if (!token) {
+            this.logger.warn('BOT_TOKEN topilmadi — foydalanuvchiga xabar yuborilmadi');
+            return;
+        }
         try {
-            await this.bot.telegram.sendMessage(telegramId, text);
-        } catch (err) {
-            this.logger.error(
-                `Telegram xabar yuborilmadi (${telegramId}): ${(err as Error).message}`,
+            const res = await fetch(
+                `https://api.telegram.org/bot${token}/sendMessage`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: Number(telegramId), text }),
+                },
             );
+            if (!res.ok) {
+                const body = await res.text();
+                this.logger.error(`Telegram API xato (${telegramId}): ${body}`);
+            }
+        } catch (err) {
+            this.logger.error(`Telegram xabar yuborilmadi (${telegramId}): ${(err as Error).message}`);
         }
     }
 
     async approve(id: number) {
-        let notifyTelegramId: number | undefined;
-        let notifyText = '';
+        let notifyUserId: number | undefined;
+        let notifyBonus = 0;
+        let notifyProductTitle = '';
 
         const updated = await this.dataSource.transaction(async (em) => {
-            // Lock — relations'siz (FOR UPDATE + LEFT JOIN Postgres'da xato beradi)
             const purchase = await em.findOne(Purchase, {
                 where: { id },
                 lock: { mode: 'pessimistic_write' },
@@ -160,7 +171,6 @@ export class ConfirmationsService {
             purchase.reviewedAt = new Date();
             const saved = await em.save(purchase);
 
-            // reviewNote dan kod ID larini parse qilib, ishlatilgan deb belgilaymiz
             if (!alreadyApproved) {
                 const idsMatch = (purchase.reviewNote ?? '').match(/\[ids:([\d,]+)\]/);
                 if (idsMatch) {
@@ -173,39 +183,33 @@ export class ConfirmationsService {
                             .execute();
                     }
                 }
-            }
-
-            if (!alreadyApproved) {
-                const [freshUser, product] = await Promise.all([
-                    // Raw query — entity manager keshini chetlab, yangi balansni olamiz
-                    em.query<{ telegramId: number; bonus: number }[]>(
-                        'SELECT "telegramId", bonus FROM users WHERE id = $1',
-                        [purchase.userId],
-                    ).then(rows => rows[0] ?? null),
-                    purchase.productId
-                        ? em.findOne(Product, { where: { id: purchase.productId } })
-                        : Promise.resolve(null),
-                ]);
-                notifyTelegramId = freshUser?.telegramId;
-                notifyText =
-                    `✅ Tabriklaymiz! "${product?.title ?? 'mahsulot'}" uchun xaridingiz tasdiqlandi.\n` +
-                    `🎉 +${purchase.bonus} bonus hisobingizga qo'shildi.\n` +
-                    `💰 Joriy bonusingiz: ${freshUser?.bonus ?? 0}`;
+                const product = purchase.productId
+                    ? await em.findOne(Product, { where: { id: purchase.productId } })
+                    : null;
+                notifyUserId = purchase.userId;
+                notifyBonus = purchase.bonus;
+                notifyProductTitle = product?.title ?? 'mahsulot';
             }
             return saved;
         });
 
-        await this.notifyUser(notifyTelegramId, notifyText);
+        // Transaksiyadan keyin yangi balansni olamiz (entity manager keshi muammosi yo'q)
+        if (notifyUserId) {
+            const user = await this.userRepo.findOne({ where: { id: notifyUserId } });
+            const text =
+                `✅ Tabriklaymiz! "${notifyProductTitle}" uchun xaridingiz tasdiqlandi.\n` +
+                `🎉 +${notifyBonus} bonus hisobingizga qo'shildi.\n` +
+                `💰 Joriy bonusingiz: ${user?.bonus ?? 0}`;
+            await this.notifyUser(user?.telegramId, text);
+        }
         return updated;
     }
 
     async reject(id: number, note = '') {
-        let notifyTelegramId: number | undefined;
-        let notifyText = '';
+        let notifyUserId: number | undefined;
+        let notifyProductTitle = '';
 
-        // Bonus yechish + status o'zgartirish — tranzaksiyada (atomik)
         const updated = await this.dataSource.transaction(async (em) => {
-            // Lock — relations'siz (FOR UPDATE + LEFT JOIN Postgres'da xato beradi)
             const purchase = await em.findOne(Purchase, {
                 where: { id },
                 lock: { mode: 'pessimistic_write' },
@@ -231,22 +235,23 @@ export class ConfirmationsService {
             const saved = await em.save(purchase);
 
             if (!alreadyRejected) {
-                const [user, product] = await Promise.all([
-                    em.findOne(User, { where: { id: purchase.userId } }),
-                    purchase.productId
-                        ? em.findOne(Product, { where: { id: purchase.productId } })
-                        : Promise.resolve(null),
-                ]);
-                notifyTelegramId = user?.telegramId;
-                notifyText =
-                    `❌ "${product?.title ?? 'mahsulot'}" uchun xaridingiz rad etildi.\n` +
-                    `Bonus hisobingizga qo'shilmadi.`;
-                if (note) notifyText += `\n📝 Sabab: ${note}`;
+                const product = purchase.productId
+                    ? await em.findOne(Product, { where: { id: purchase.productId } })
+                    : null;
+                notifyUserId = purchase.userId;
+                notifyProductTitle = product?.title ?? 'mahsulot';
             }
             return saved;
         });
 
-        await this.notifyUser(notifyTelegramId, notifyText);
+        if (notifyUserId) {
+            const user = await this.userRepo.findOne({ where: { id: notifyUserId } });
+            let text =
+                `❌ "${notifyProductTitle}" uchun xaridingiz rad etildi.\n` +
+                `Bonus hisobingizga qo'shilmadi.`;
+            if (note) text += `\n📝 Sabab: ${note}`;
+            await this.notifyUser(user?.telegramId, text);
+        }
         return updated;
     }
 }

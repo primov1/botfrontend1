@@ -1,4 +1,3 @@
-import { Telegraf } from 'telegraf';
 import { DataSource, Repository } from 'typeorm';
 import { Purchase, PurchaseStatus } from '../common/entities/purchase.entity';
 import { User } from '../common/entities/user.entity';
@@ -8,10 +7,9 @@ export declare class ConfirmationsService {
     private readonly purchaseRepo;
     private readonly userRepo;
     private readonly codeRepo;
-    private readonly bot;
     private readonly dataSource;
     private readonly logger;
-    constructor(purchaseRepo: Repository<Purchase>, userRepo: Repository<User>, codeRepo: Repository<Code>, bot: Telegraf, dataSource: DataSource);
+    constructor(purchaseRepo: Repository<Purchase>, userRepo: Repository<User>, codeRepo: Repository<Code>, dataSource: DataSource);
     counts(): Promise<{
         pending: number;
         approved: number;
