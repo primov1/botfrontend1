@@ -10,39 +10,37 @@
   {{#if saved}}<div class="alert alert-success">✅ Saqlandi</div>{{/if}}
 
   <div class="card" style="max-width:480px">
-    <form method="POST" action="/gifts/settings/contact">
-      <div class="form-group" style="margin-bottom:20px">
-        <label class="field">
-          <span class="field-label">📱 Admin telefon raqami</span>
-          <input class="input" type="tel" name="phone" value="{{phone}}"
-                 placeholder="+998901234567" style="max-width:300px" />
-          <span class="field-hint">Xaridor tasdiqlangach shu raqamni ko'radi</span>
-        </label>
-      </div>
+    <form method="POST" action="/gifts/settings/contact" class="form">
+      <label class="field">
+        <span class="field-label">📱 Admin telefon raqami</span>
+        <input class="input" type="tel" name="phone" value="{{phone}}"
+               placeholder="+998901234567" style="max-width:280px" />
+        <span class="field-hint">Xaridor tasdiqlangach shu raqamni ko'radi</span>
+      </label>
 
-      <div class="form-group" style="margin-bottom:24px">
-        <label class="field">
-          <span class="field-label">✈️ Telegram nik (username)</span>
-          <div style="display:flex;align-items:center;gap:6px;max-width:300px">
-            <span style="color:var(--text-secondary);font-size:1.1rem">@</span>
-            <input class="input" type="text" name="telegram" value="{{telegram}}"
-                   placeholder="username" style="flex:1" />
-          </div>
-          <span class="field-hint">@ belgisisiz kiriting, masalan: myshop_admin</span>
-        </label>
-      </div>
+      <label class="field">
+        <span class="field-label">✈️ Telegram nik (username)</span>
+        <div class="input-with-icon" style="max-width:280px">
+          <span class="input-icon" style="font-weight:600;color:var(--muted)">@</span>
+          <input class="input input-icon-padded" type="text" name="telegram"
+                 value="{{telegram}}" placeholder="myshop_admin" />
+        </div>
+        <span class="field-hint">@ belgisisiz kiriting, masalan: myshop_admin</span>
+      </label>
 
-      <div style="display:flex;gap:10px">
-        <button class="btn btn-primary" type="submit">💾 Saqlash</button>
+      <div class="form-actions">
         <a class="btn btn-ghost" href="/gifts">Bekor qilish</a>
+        <button class="btn btn-primary" type="submit">💾 Saqlash</button>
       </div>
     </form>
   </div>
 
-  <div class="card" style="max-width:480px;margin-top:16px;background:var(--bg-secondary,#f8f9fa)">
-    <p style="margin:0;font-size:0.9rem;color:var(--text-secondary)">
-      <b>Namuna xabar (tasdiqlangach user ga yuboriladi):</b><br><br>
-      ✅ Tabriklaymiz! "Sovg'a nomi" sovg'angiz tasdiqlandi.<br><br>
+  <div class="card" style="max-width:480px;margin-top:16px;padding:20px;background:var(--bg,#f8f9fa)">
+    <p style="margin:0 0 10px;font-size:13px;font-weight:600;">
+      Namuna xabar (tasdiqlangach user ga yuboriladi):
+    </p>
+    <p style="margin:0;font-size:13px;color:var(--muted);line-height:1.8">
+      ✅ Tabriklaymiz! "Sovg'a nomi" sovg'angiz tasdiqlandi.<br>
       {{#if phone}}📱 Tel: {{phone}}<br>{{/if}}
       {{#if telegram}}✈️ Telegram: @{{telegram}}{{/if}}
       {{#unless phone}}{{#unless telegram}}<i style="color:#aaa">Kontakt kiritilmagan</i>{{/unless}}{{/unless}}
