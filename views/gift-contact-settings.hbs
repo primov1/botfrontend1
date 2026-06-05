@@ -1,0 +1,51 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">📞 Admin kontakt ma'lumotlari</h2>
+      <p class="page-sub">Sovg'a tasdiqlanganda xaridor shu raqam/nik orqali siz bilan bog'lanadi</p>
+    </div>
+    <a class="btn btn-ghost" href="/gifts">← Sovg'alar</a>
+  </div>
+
+  {{#if saved}}<div class="alert alert-success">✅ Saqlandi</div>{{/if}}
+
+  <div class="card" style="max-width:480px">
+    <form method="POST" action="/gifts/settings/contact">
+      <div class="form-group" style="margin-bottom:20px">
+        <label class="field">
+          <span class="field-label">📱 Admin telefon raqami</span>
+          <input class="input" type="tel" name="phone" value="{{phone}}"
+                 placeholder="+998901234567" style="max-width:300px" />
+          <span class="field-hint">Xaridor tasdiqlangach shu raqamni ko'radi</span>
+        </label>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px">
+        <label class="field">
+          <span class="field-label">✈️ Telegram nik (username)</span>
+          <div style="display:flex;align-items:center;gap:6px;max-width:300px">
+            <span style="color:var(--text-secondary);font-size:1.1rem">@</span>
+            <input class="input" type="text" name="telegram" value="{{telegram}}"
+                   placeholder="username" style="flex:1" />
+          </div>
+          <span class="field-hint">@ belgisisiz kiriting, masalan: myshop_admin</span>
+        </label>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" type="submit">💾 Saqlash</button>
+        <a class="btn btn-ghost" href="/gifts">Bekor qilish</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" style="max-width:480px;margin-top:16px;background:var(--bg-secondary,#f8f9fa)">
+    <p style="margin:0;font-size:0.9rem;color:var(--text-secondary)">
+      <b>Namuna xabar (tasdiqlangach user ga yuboriladi):</b><br><br>
+      ✅ Tabriklaymiz! "Sovg'a nomi" sovg'angiz tasdiqlandi.<br><br>
+      {{#if phone}}📱 Tel: {{phone}}<br>{{/if}}
+      {{#if telegram}}✈️ Telegram: @{{telegram}}{{/if}}
+      {{#unless phone}}{{#unless telegram}}<i style="color:#aaa">Kontakt kiritilmagan</i>{{/unless}}{{/unless}}
+    </p>
+  </div>
+</div>

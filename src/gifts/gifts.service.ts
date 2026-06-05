@@ -4,7 +4,7 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, ILike } from 'typeorm';
+import { DataSource, Repository, ILike } from 'typeorm';
 import { Gift } from '../common/entities/gift.entity';
 
 export interface GiftDto {
@@ -18,6 +18,7 @@ export class GiftsService {
     constructor(
         @InjectRepository(Gift)
         private readonly giftRepo: Repository<Gift>,
+        private readonly dataSource: DataSource,
     ) {}
 
     async list(q?: string, page = 1, limit = 20) {
@@ -106,5 +107,22 @@ export class GiftsService {
 
     async count() {
         return this.giftRepo.count();
+    }
+
+    async getSetting(key: string): Promise<string> {
+        try {
+            const rows = await this.dataSource.query(
+                'SELECT "value" FROM "app_settings" WHERE "key" = $1', [key],
+            );
+            return rows[0]?.value ?? '';
+        } catch { return ''; }
+    }
+
+    async setSetting(key: string, value: string): Promise<void> {
+        await this.dataSource.query(
+            `INSERT INTO "app_settings" ("key","value") VALUES ($1,$2)
+             ON CONFLICT ("key") DO UPDATE SET "value"=EXCLUDED."value"`,
+            [key, value],
+        );
     }
 }

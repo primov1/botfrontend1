@@ -4,7 +4,10 @@
       <h2 class="page-title">{{t 'nav_gifts'}}</h2>
       <p class="page-sub">{{t 'gifts_sub'}}</p>
     </div>
-    <a class="btn btn-primary" href="/gifts/new">{{t 'new_gift'}}</a>
+    <div style="display:flex;gap:8px">
+      <a class="btn btn-ghost" href="/gifts/settings/contact">📞 Admin kontakti</a>
+      <a class="btn btn-primary" href="/gifts/new">{{t 'new_gift'}}</a>
+    </div>
   </div>
 
   {{#if created}}<div class="alert alert-success">{{t 'gift_created'}}</div>{{/if}}

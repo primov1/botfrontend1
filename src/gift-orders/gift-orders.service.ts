@@ -103,7 +103,19 @@ export class GiftOrdersService implements OnModuleInit {
             title = gift?.title ?? 'sovg\'a';
         });
 
-        await this.notify(notifyTelegramId, `✅ Tabriklaymiz! "${title}" sovg'angiz tasdiqlandi. Tez orada yetkaziladi.`);
+        const [adminPhone, adminTg] = await Promise.all([
+            this.getSetting('gift_admin_phone'),
+            this.getSetting('gift_admin_telegram'),
+        ]);
+        let contactLine = '';
+        if (adminPhone || adminTg) {
+            contactLine = '\n\n📞 Bog\'lanish uchun:';
+            if (adminPhone) contactLine += `\n📱 Tel: ${adminPhone}`;
+            if (adminTg) contactLine += `\n✈️ Telegram: @${adminTg.replace(/^@/, '')}`;
+        }
+        await this.notify(notifyTelegramId,
+            `✅ Tabriklaymiz! "${title}" sovg'angiz tasdiqlandi.${contactLine}`,
+        );
     }
 
     /** Rad etish — bonus FOYDALANUVCHIGA QAYTARILADI. */
@@ -154,6 +166,15 @@ export class GiftOrdersService implements OnModuleInit {
         const order = await this.giftPurchaseRepo.findOne({ where: { id } });
         if (!order) throw new NotFoundException('Buyurtma topilmadi');
         await this.giftPurchaseRepo.remove(order);
+    }
+
+    private async getSetting(key: string): Promise<string> {
+        try {
+            const rows = await this.dataSource.query(
+                'SELECT "value" FROM "app_settings" WHERE "key" = $1', [key],
+            );
+            return rows[0]?.value ?? '';
+        } catch { return ''; }
     }
 
     private async notify(telegramId: number | undefined, text: string): Promise<void> {

@@ -109,4 +109,28 @@ export class GiftsController {
         await this.giftsService.remove(id);
         return res.redirect('/gifts?deleted=1');
     }
+
+    @Get('settings/contact')
+    async contactSettingsPage(@Query('saved') saved: string, @Res() res: Response) {
+        const [phone, telegram] = await Promise.all([
+            this.giftsService.getSetting('gift_admin_phone'),
+            this.giftsService.getSetting('gift_admin_telegram'),
+        ]);
+        return res.render('gift-contact-settings', {
+            title: "Sovg'a — admin kontakti",
+            active: 'gifts',
+            phone,
+            telegram,
+            saved: saved === '1',
+        });
+    }
+
+    @Post('settings/contact')
+    async saveContactSettings(@Body() body: any, @Res() res: Response) {
+        await Promise.all([
+            this.giftsService.setSetting('gift_admin_phone', (body.phone ?? '').trim().slice(0, 30)),
+            this.giftsService.setSetting('gift_admin_telegram', (body.telegram ?? '').trim().replace(/^@/, '').slice(0, 64)),
+        ]);
+        return res.redirect('/gifts/settings/contact?saved=1');
+    }
 }
