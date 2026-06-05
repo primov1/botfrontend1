@@ -74,7 +74,6 @@ export class ConfirmationsService {
             status: r.status ?? 'pending',
             reviewSubmitted: !!r.reviewSubmitted,
             proofImage: r.proofImage ?? '',
-            reviewComment: r.reviewComment ?? '',
             reviewNote: r.reviewNote ?? '',
             reviewedAt: r.reviewedAt ?? null,
             createdAt: r.createdAt,
@@ -133,7 +132,7 @@ export class ConfirmationsService {
         try {
             await this.bot.telegram.sendMessage(telegramId, text);
         } catch (err) {
-            this.logger.warn(
+            this.logger.error(
                 `Telegram xabar yuborilmadi (${telegramId}): ${(err as Error).message}`,
             );
         }
