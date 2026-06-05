@@ -207,7 +207,7 @@ let UsersService = class UsersService {
         const purchaseRows = purchases.map((p) => ({
             id: p.id, bonus: p.bonus ?? 0, quantity: p.quantity ?? 1, status: p.status ?? 'pending',
             reviewSubmitted: !!p.reviewSubmitted, proofImage: p.proofImage ?? '',
-            reviewComment: p.reviewComment ?? '', reviewNote: p.reviewNote ?? '',
+            reviewNote: p.reviewNote ?? '',
             reviewedAt: p.reviewedAt ?? null, createdAt: p.createdAt,
             product: p.product ? {
                 id: p.product.id, title: p.product.title,

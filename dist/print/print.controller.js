@@ -27,15 +27,14 @@ let PrintController = class PrintController {
         this.pdfService = pdfService;
         this.codesService = codesService;
     }
-    async generatePdf(botUsername, text, count, productId, res) {
-        const nick = (botUsername ?? '').replace(/^@/, '').trim();
+    async generatePdf(text, count, productId, res) {
         const n = Math.floor(Number(count) || 0);
         const pid = Number(productId) || 0;
-        if (!nick || n < 1) {
-            return res.redirect('/admin/codes?error=' + encodeURIComponent('Bot nik va son kiriting'));
+        if (n < 1) {
+            return res.redirect('/admin/codes?error=' + encodeURIComponent('Nechta ekanligi kiriting'));
         }
         try {
-            await this.codesService.setBotUsername(nick);
+            const nick = await this.printService.getBotUsername();
             await this.codesService.setStickerText(text ?? '');
             const { codes } = await this.codesService.generateCodes(pid, n);
             const pdf = await this.pdfService.generate(codes, {
@@ -74,13 +73,12 @@ let PrintController = class PrintController {
 exports.PrintController = PrintController;
 __decorate([
     (0, common_1.Post)('generate-pdf'),
-    __param(0, (0, common_1.Body)('bot_username')),
-    __param(1, (0, common_1.Body)('text')),
-    __param(2, (0, common_1.Body)('count')),
-    __param(3, (0, common_1.Body)('product_id')),
-    __param(4, (0, common_1.Res)()),
+    __param(0, (0, common_1.Body)('text')),
+    __param(1, (0, common_1.Body)('count')),
+    __param(2, (0, common_1.Body)('product_id')),
+    __param(3, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, Object]),
+    __metadata("design:paramtypes", [String, String, String, Object]),
     __metadata("design:returntype", Promise)
 ], PrintController.prototype, "generatePdf", null);
 __decorate([

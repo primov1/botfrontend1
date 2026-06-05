@@ -55,18 +55,15 @@ const node_fs_1 = require("node:fs");
 const node_path_1 = require("node:path");
 const QRCode = __importStar(require("qrcode"));
 const code_entity_1 = require("../common/entities/code.entity");
-const product_entity_1 = require("../common/entities/product.entity");
 const codes_service_1 = require("../codes/codes.service");
 let PrintService = class PrintService {
     codeRepo;
-    productRepo;
     bot;
     codesService;
     cachedUsername;
     cachedLogo;
-    constructor(codeRepo, productRepo, bot, codesService) {
+    constructor(codeRepo, bot, codesService) {
         this.codeRepo = codeRepo;
-        this.productRepo = productRepo;
         this.bot = bot;
         this.codesService = codesService;
     }
@@ -131,25 +128,17 @@ let PrintService = class PrintService {
         const topText = await this.codesService.getStickerText();
         const logo = this.getLogoDataUrl();
         const logoHtml = logo ? `<img class="logo" src="${logo}" alt="logo">` : '';
-        const qrEntry = await this.generateQrCode(`https://t.me/${username}`);
         const parts = [];
         for (const c of codes) {
-            const qrConfirm = await this.generateQrCode(`https://t.me/${username}?start=${c.code}`);
+            const qr = await this.generateQrCode(`https://t.me/${username}?start=${c.code}`);
             parts.push(`
         <div class="sticker">
           <div class="s-top">
             ${logoHtml}
             <div class="s-text">${this.esc(topText)}</div>
           </div>
-          <div class="qr-row">
-            <div class="qr-col">
-              <img class="qr" src="${qrEntry}" alt="QR1">
-              <div class="qr-label">▶️ Botga kirish</div>
-            </div>
-            <div class="qr-col">
-              <img class="qr" src="${qrConfirm}" alt="QR2">
-              <div class="qr-label">📸 Xaridni tasdiqlash</div>
-            </div>
+          <div class="qr-center">
+            <img class="qr" src="${qr}" alt="QR">
           </div>
           <div class="s-id">ID: <b>${this.esc(c.code)}</b></div>
           <div class="s-exp">${this.fmtExpiry(c.expiresAt)}</div>
@@ -181,10 +170,8 @@ let PrintService = class PrintService {
   .s-top { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 2mm; }
   .logo { height: 8mm; max-width: 24mm; object-fit: contain; }
   .s-text { font-size: 10pt; font-weight: 700; line-height: 1.15; }
-  .qr-row { display: flex; justify-content: space-around; align-items: flex-start; gap: 4mm; }
-  .qr-col { display: flex; flex-direction: column; align-items: center; }
-  .qr { width: 26mm; height: 26mm; }
-  .qr-label { font-size: 7.5pt; font-weight: 600; margin-top: 1mm; color: #1e293b; }
+  .qr-center { display: flex; justify-content: center; margin: 2mm 0; }
+  .qr { width: 40mm; height: 40mm; }
   .s-id { margin-top: 2.5mm; font-family: 'Courier New', monospace; font-size: 12pt; letter-spacing: 2px; }
   .s-id b { font-weight: 700; }
   .s-exp { font-size: 7.5pt; color: #64748b; margin-top: 0.5mm; }
@@ -210,10 +197,8 @@ exports.PrintService = PrintService;
 exports.PrintService = PrintService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(code_entity_1.Code)),
-    __param(1, (0, typeorm_1.InjectRepository)(product_entity_1.Product)),
-    __param(2, (0, nestjs_telegraf_1.InjectBot)()),
+    __param(1, (0, nestjs_telegraf_1.InjectBot)()),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository,
         telegraf_1.Telegraf,
         codes_service_1.CodesService])
 ], PrintService);

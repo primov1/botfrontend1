@@ -13,13 +13,12 @@ const print_service_1 = require("./print.service");
 const pdf_service_1 = require("./pdf.service");
 const print_controller_1 = require("./print.controller");
 const code_entity_1 = require("../common/entities/code.entity");
-const product_entity_1 = require("../common/entities/product.entity");
 let PrintModule = class PrintModule {
 };
 exports.PrintModule = PrintModule;
 exports.PrintModule = PrintModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([code_entity_1.Code, product_entity_1.Product])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([code_entity_1.Code])],
         controllers: [print_controller_1.PrintController],
         providers: [print_service_1.PrintService, pdf_service_1.PdfService],
         exports: [print_service_1.PrintService, pdf_service_1.PdfService],

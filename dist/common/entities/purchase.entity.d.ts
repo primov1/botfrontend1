@@ -13,7 +13,6 @@ export declare class Purchase {
     status: PurchaseStatus;
     reviewSubmitted: boolean;
     proofImage: string;
-    reviewComment: string;
     reviewedAt: Date | null;
     reviewNote: string;
     createdAt: Date;

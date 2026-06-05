@@ -75,7 +75,6 @@ let ConfirmationsService = ConfirmationsService_1 = class ConfirmationsService {
             status: r.status ?? 'pending',
             reviewSubmitted: !!r.reviewSubmitted,
             proofImage: r.proofImage ?? '',
-            reviewComment: r.reviewComment ?? '',
             reviewNote: r.reviewNote ?? '',
             reviewedAt: r.reviewedAt ?? null,
             createdAt: r.createdAt,
@@ -133,7 +132,7 @@ let ConfirmationsService = ConfirmationsService_1 = class ConfirmationsService {
             await this.bot.telegram.sendMessage(telegramId, text);
         }
         catch (err) {
-            this.logger.warn(`Telegram xabar yuborilmadi (${telegramId}): ${err.message}`);
+            this.logger.error(`Telegram xabar yuborilmadi (${telegramId}): ${err.message}`);
         }
     }
     async approve(id) {

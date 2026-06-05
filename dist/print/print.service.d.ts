@@ -1,16 +1,14 @@
 import { Telegraf } from 'telegraf';
 import { Repository } from 'typeorm';
 import { Code } from '../common/entities/code.entity';
-import { Product } from '../common/entities/product.entity';
 import { CodesService } from '../codes/codes.service';
 export declare class PrintService {
     private readonly codeRepo;
-    private readonly productRepo;
     private readonly bot;
     private readonly codesService;
     private cachedUsername?;
     private cachedLogo?;
-    constructor(codeRepo: Repository<Code>, productRepo: Repository<Product>, bot: Telegraf, codesService: CodesService);
+    constructor(codeRepo: Repository<Code>, bot: Telegraf, codesService: CodesService);
     paginateCodes(productId: number, page?: number, limit?: number): Promise<{
         items: Code[];
         total: number;

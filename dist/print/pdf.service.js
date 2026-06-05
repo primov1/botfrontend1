@@ -61,28 +61,22 @@ let PdfService = class PdfService {
         const chunks = [];
         doc.on('data', (c) => chunks.push(c));
         const finished = new Promise((resolve) => doc.on('end', () => resolve()));
-        const qrEntry = await QRCode.toBuffer(`https://t.me/${user}`, { margin: 1, width: 240 });
-        const qrSize = mm(17);
+        const qrSize = mm(26);
         const pad = mm(2);
         let first = true;
         for (const code of codes) {
             if (!first)
                 doc.addPage({ size: [W, H], margin: 0 });
             first = false;
-            const url2 = opts.productId > 0
+            const url = opts.productId > 0
                 ? `https://t.me/${user}?start=${code}`
                 : `https://t.me/${user}`;
-            const qrConfirm = await QRCode.toBuffer(url2, { margin: 1, width: 240 });
+            const qrBuf = await QRCode.toBuffer(url, { margin: 1, width: 300 });
             doc.fillColor('#000').font('Helvetica-Bold').fontSize(7.5)
                 .text(text, pad, mm(2), { width: W - pad * 2, align: 'center', height: mm(7), ellipsis: true });
+            const qx = (W - qrSize) / 2;
             const qy = mm(10);
-            const leftX = W / 2 - qrSize - mm(2);
-            const rightX = W / 2 + mm(2);
-            doc.image(qrEntry, leftX, qy, { width: qrSize, height: qrSize });
-            doc.image(qrConfirm, rightX, qy, { width: qrSize, height: qrSize });
-            doc.font('Helvetica').fontSize(5).fillColor('#222')
-                .text('Botga kirish', leftX, qy + qrSize + mm(0.6), { width: qrSize, align: 'center' })
-                .text('Tasdiqlash', rightX, qy + qrSize + mm(0.6), { width: qrSize, align: 'center' });
+            doc.image(qrBuf, qx, qy, { width: qrSize, height: qrSize });
             doc.font('Courier-Bold').fontSize(12).fillColor('#000')
                 .text(code, pad, H - mm(8.5), { width: W - pad * 2, align: 'center' });
         }

@@ -55,7 +55,6 @@ export declare class UsersService {
             status: "pending" | "approved" | "rejected";
             reviewSubmitted: boolean;
             proofImage: string;
-            reviewComment: string;
             reviewNote: string;
             reviewedAt: Date | null;
             createdAt: Date;

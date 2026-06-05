@@ -25,7 +25,6 @@ let Purchase = class Purchase {
     status;
     reviewSubmitted;
     proofImage;
-    reviewComment;
     reviewedAt;
     reviewNote;
     createdAt;
@@ -80,10 +79,6 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', default: '' }),
     __metadata("design:type", String)
 ], Purchase.prototype, "proofImage", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'text', default: '' }),
-    __metadata("design:type", String)
-], Purchase.prototype, "reviewComment", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'timestamp', nullable: true }),
     __metadata("design:type", Object)

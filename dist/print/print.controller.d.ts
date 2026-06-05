@@ -7,7 +7,7 @@ export declare class PrintController {
     private readonly pdfService;
     private readonly codesService;
     constructor(printService: PrintService, pdfService: PdfService, codesService: CodesService);
-    generatePdf(botUsername: string, text: string, count: string, productId: string, res: Response): Promise<void>;
+    generatePdf(text: string, count: string, productId: string, res: Response): Promise<void>;
     single(codeId: number, res: Response): Promise<void>;
     print(productId: number, page: string, limit: string, res: Response): Promise<void>;
 }
