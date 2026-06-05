@@ -13,18 +13,11 @@
   <div class="card" style="margin-bottom:16px">
     <div class="card-header"><h3 class="card-title">🖨 Stiker PDF yaratish</h3></div>
     <form method="POST" action="/admin/print/generate-pdf" class="form">
-      <div class="grid-2">
-        <label class="field">
-          <span class="field-label">Bot nik (@username) <span class="req">*</span></span>
-          <input class="input" type="text" name="bot_username" value="{{botUsername}}" required
-                 placeholder="masalan: imkonplusuzum_bot">
-        </label>
-        <label class="field">
-          <span class="field-label">Nechta? <span class="req">*</span></span>
-          <input class="input" type="number" name="count" min="1" max="10000" step="1"
-                 value="100" required placeholder="masalan: 100">
-        </label>
-      </div>
+      <label class="field" style="max-width:220px">
+        <span class="field-label">Nechta? <span class="req">*</span></span>
+        <input class="input" type="number" name="count" min="1" max="10000" step="1"
+               value="100" required placeholder="masalan: 100">
+      </label>
       <label class="field">
         <span class="field-label">Stiker matni</span>
         <input class="input" type="text" name="text" maxlength="200" value="{{stickerText}}"
@@ -44,7 +37,7 @@
       </div>
     </form>
     <p class="field-hint" style="padding:6px 4px 0">
-      Kod: <code>AXZ78RT</code> (7 talik). Har stiker: 2 QR (kirish + tasdiqlash) + kod.
+      Kod: <code>AXZ78RT</code> (7 talik). Har stiker: 1 QR (?start=KOD) + kod.
       PDF har yorliq alohida sahifa — xprinterda chop eting.
     </p>
   </div>

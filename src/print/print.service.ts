@@ -2,12 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import * as QRCode from 'qrcode';
 import { Code } from '../common/entities/code.entity';
-import { Product } from '../common/entities/product.entity';
 import { CodesService } from '../codes/codes.service';
 
 @Injectable()
@@ -17,7 +16,6 @@ export class PrintService {
 
     constructor(
         @InjectRepository(Code) private readonly codeRepo: Repository<Code>,
-        @InjectRepository(Product) private readonly productRepo: Repository<Product>,
         @InjectBot() private readonly bot: Telegraf,
         private readonly codesService: CodesService,
     ) {}
@@ -81,7 +79,7 @@ export class PrintService {
         return `${m}.${date.getFullYear()}`;
     }
 
-    /** Stikerlar HTML (string). Har stikerda 2 QR + 7 talik ID + admin matn. */
+    /** Stikerlar HTML (string). Har stikerda 1 QR (?start=KOD) + 7 talik ID + admin matn. */
     async generateStickerHtml(codes: Code[]): Promise<string> {
         if (!codes.length) return '<p style="padding:20px">Kod yo\'q</p>';
 
@@ -90,28 +88,17 @@ export class PrintService {
         const logo = this.getLogoDataUrl();
         const logoHtml = logo ? `<img class="logo" src="${logo}" alt="logo">` : '';
 
-        // QR-1 — oddiy kirish (barcha stiker uchun bir xil)
-        const qrEntry = await this.generateQrCode(`https://t.me/${username}`);
-
         const parts: string[] = [];
         for (const c of codes) {
-            // QR-2 — kod bilan (chek yuklashga to'g'ridan o'tkazadi)
-            const qrConfirm = await this.generateQrCode(`https://t.me/${username}?start=${c.code}`);
+            const qr = await this.generateQrCode(`https://t.me/${username}?start=${c.code}`);
             parts.push(`
         <div class="sticker">
           <div class="s-top">
             ${logoHtml}
             <div class="s-text">${this.esc(topText)}</div>
           </div>
-          <div class="qr-row">
-            <div class="qr-col">
-              <img class="qr" src="${qrEntry}" alt="QR1">
-              <div class="qr-label">▶️ Botga kirish</div>
-            </div>
-            <div class="qr-col">
-              <img class="qr" src="${qrConfirm}" alt="QR2">
-              <div class="qr-label">📸 Xaridni tasdiqlash</div>
-            </div>
+          <div class="qr-center">
+            <img class="qr" src="${qr}" alt="QR">
           </div>
           <div class="s-id">ID: <b>${this.esc(c.code)}</b></div>
           <div class="s-exp">${this.fmtExpiry(c.expiresAt)}</div>
@@ -145,10 +132,8 @@ export class PrintService {
   .s-top { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 2mm; }
   .logo { height: 8mm; max-width: 24mm; object-fit: contain; }
   .s-text { font-size: 10pt; font-weight: 700; line-height: 1.15; }
-  .qr-row { display: flex; justify-content: space-around; align-items: flex-start; gap: 4mm; }
-  .qr-col { display: flex; flex-direction: column; align-items: center; }
-  .qr { width: 26mm; height: 26mm; }
-  .qr-label { font-size: 7.5pt; font-weight: 600; margin-top: 1mm; color: #1e293b; }
+  .qr-center { display: flex; justify-content: center; margin: 2mm 0; }
+  .qr { width: 40mm; height: 40mm; }
   .s-id { margin-top: 2.5mm; font-family: 'Courier New', monospace; font-size: 12pt; letter-spacing: 2px; }
   .s-id b { font-weight: 700; }
   .s-exp { font-size: 7.5pt; color: #64748b; margin-top: 0.5mm; }

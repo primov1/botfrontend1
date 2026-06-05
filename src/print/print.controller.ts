@@ -14,25 +14,22 @@ export class PrintController {
         private readonly codesService: CodesService,
     ) {}
 
-    /** Bot nik + matn + nechta → kodlarni yaratib, PDF (xprinter) qaytaradi. */
+    /** Matn + nechta → kodlarni yaratib, PDF (xprinter) qaytaradi. */
     @Post('generate-pdf')
     async generatePdf(
-        @Body('bot_username') botUsername: string,
         @Body('text') text: string,
         @Body('count') count: string,
         @Body('product_id') productId: string,
         @Res() res: Response,
     ) {
-        const nick = (botUsername ?? '').replace(/^@/, '').trim();
         const n = Math.floor(Number(count) || 0);
         const pid = Number(productId) || 0;
 
-        if (!nick || n < 1) {
-            return res.redirect('/admin/codes?error=' + encodeURIComponent('Bot nik va son kiriting'));
+        if (n < 1) {
+            return res.redirect('/admin/codes?error=' + encodeURIComponent('Nechta ekanligi kiriting'));
         }
         try {
-            // Sozlamalarni saqlaymiz (keyingi safar avtomatik to'ladi)
-            await this.codesService.setBotUsername(nick);
+            const nick = await this.printService.getBotUsername();
             await this.codesService.setStickerText(text ?? '');
 
             const { codes } = await this.codesService.generateCodes(pid, n);
