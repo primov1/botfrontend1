@@ -1,7 +1,6 @@
-import { Controller, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import type { Request } from 'express';
 import { AdminAuthGuard } from '../common/auth.guard';
 import { UploadImageService } from './upload-image.service';
 import sharp from 'sharp';
@@ -19,7 +18,7 @@ export class UploadController {
             cb(null, ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype));
         },
     }))
-    async uploadImage(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
+    async uploadImage(@UploadedFile() file: Express.Multer.File) {
         if (!file) return { success: false, error: 'Fayl yuklanmadi' };
         try {
             const optimized = await sharp(file.buffer)
@@ -27,9 +26,9 @@ export class UploadController {
                 .jpeg({ quality: 85 })
                 .toBuffer();
 
-            // Tashqi xizmatsiz — to'g'ridan bazaga saqlaymiz
-            const id = await this.images.save(optimized, 'image/jpeg');
-            return { success: true, url: this.images.buildUrl(req, id) };
+            const url = await this.images.upload(optimized);
+            if (!url) return { success: false, error: 'IMGBB_API_KEY sozlanmagan' };
+            return { success: true, url };
         } catch (err) {
             return { success: false, error: (err as Error).message };
         }

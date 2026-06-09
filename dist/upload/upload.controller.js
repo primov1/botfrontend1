@@ -27,7 +27,7 @@ let UploadController = class UploadController {
     constructor(images) {
         this.images = images;
     }
-    async uploadImage(file, req) {
+    async uploadImage(file) {
         if (!file)
             return { success: false, error: 'Fayl yuklanmadi' };
         try {
@@ -35,8 +35,10 @@ let UploadController = class UploadController {
                 .resize(800, 800, { fit: 'inside', withoutEnlargement: true })
                 .jpeg({ quality: 85 })
                 .toBuffer();
-            const id = await this.images.save(optimized, 'image/jpeg');
-            return { success: true, url: this.images.buildUrl(req, id) };
+            const url = await this.images.upload(optimized);
+            if (!url)
+                return { success: false, error: 'IMGBB_API_KEY sozlanmagan' };
+            return { success: true, url };
         }
         catch (err) {
             return { success: false, error: err.message };
@@ -54,9 +56,8 @@ __decorate([
         },
     })),
     __param(0, (0, common_1.UploadedFile)()),
-    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UploadController.prototype, "uploadImage", null);
 exports.UploadController = UploadController = __decorate([

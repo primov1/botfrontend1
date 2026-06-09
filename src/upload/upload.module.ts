@@ -1,11 +1,10 @@
 import { Global, Module } from '@nestjs/common';
 import { UploadController } from './upload.controller';
-import { ImagesController } from './images.controller';
 import { UploadImageService } from './upload-image.service';
 
 @Global()
 @Module({
-    controllers: [UploadController, ImagesController],
+    controllers: [UploadController],
     providers: [UploadImageService],
     exports: [UploadImageService],
 })

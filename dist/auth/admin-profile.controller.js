@@ -92,7 +92,7 @@ let AdminProfileController = class AdminProfileController {
         });
         return res.redirect('/admin/profile?cred_ok=1');
     }
-    async uploadAvatar(req, file, res) {
+    async uploadAvatar(_req, file, res) {
         if (!file)
             return res.redirect('/admin/profile?avatar_error=invalid_file');
         try {
@@ -100,8 +100,10 @@ let AdminProfileController = class AdminProfileController {
                 .resize(200, 200, { fit: 'cover' })
                 .jpeg({ quality: 85 })
                 .toBuffer();
-            const id = await this.uploadImage.save(resized, 'image/jpeg');
-            await this.adminsService.setAvatar(this.currentLogin(req), this.uploadImage.buildUrl(req, id));
+            const url = await this.uploadImage.upload(resized);
+            if (!url)
+                return res.redirect('/admin/profile?avatar_error=imgbb_key_missing');
+            await this.adminsService.setAvatar(this.currentLogin(_req), url);
             return res.redirect('/admin/profile?avatar_ok=1');
         }
         catch {

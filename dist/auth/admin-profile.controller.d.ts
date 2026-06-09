@@ -11,6 +11,6 @@ export declare class AdminProfileController {
     show(req: Request, query: Record<string, string>, res: Response): Promise<void>;
     updateName(req: Request, name: string, res: Response): Promise<void>;
     updateCredentials(req: Request, currentPassword: string, newLogin: string, newPassword: string, confirmPassword: string, phone: string, res: Response): Promise<void>;
-    uploadAvatar(req: Request, file: Express.Multer.File, res: Response): Promise<void>;
+    uploadAvatar(_req: Request, file: Express.Multer.File, res: Response): Promise<void>;
     removeAvatar(req: Request, res: Response): Promise<void>;
 }

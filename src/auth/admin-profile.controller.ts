@@ -107,7 +107,7 @@ export class AdminProfileController {
             cb(null, ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype));
         },
     }))
-    async uploadAvatar(@Req() req: Request, @UploadedFile() file: Express.Multer.File, @Res() res: Response) {
+    async uploadAvatar(@Req() _req: Request, @UploadedFile() file: Express.Multer.File, @Res() res: Response) {
         if (!file) return res.redirect('/admin/profile?avatar_error=invalid_file');
         try {
             const resized = await sharp(file.buffer)
@@ -115,9 +115,9 @@ export class AdminProfileController {
                 .jpeg({ quality: 85 })
                 .toBuffer();
 
-            // Tashqi xizmatsiz — bazaga saqlaymiz
-            const id = await this.uploadImage.save(resized, 'image/jpeg');
-            await this.adminsService.setAvatar(this.currentLogin(req), this.uploadImage.buildUrl(req, id));
+            const url = await this.uploadImage.upload(resized);
+            if (!url) return res.redirect('/admin/profile?avatar_error=imgbb_key_missing');
+            await this.adminsService.setAvatar(this.currentLogin(_req), url);
             return res.redirect('/admin/profile?avatar_ok=1');
         } catch {
             return res.redirect('/admin/profile?avatar_error=processing');
